@@ -62,7 +62,9 @@ export class TitleScene extends Phaser.Scene {
     text(330, 68, 'THE WILD', 8, TEXT.canal);
     WILD.forEach((key, i) => sprite(key, 303 + i * 18, 88));
 
-    this.start = text(cx, 110, '> START <', 16, TEXT.amber).setInteractive({ useHandCursor: true });
+    this.start = text(cx, 110, '> START <', 16, TEXT.amber);
+    // A hit area well beyond the letters, so a thumb finds it.
+    this.start.setInteractive({ hitArea: new Phaser.Geom.Rectangle(-24, -8, this.start.width + 48, this.start.height + 16), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
     this.start.on('pointerdown', () => this.begin());
     const touchScreen = window.matchMedia?.('(pointer: coarse)').matches ?? false;
     text(cx, 132, touchScreen ? 'TAP START' : 'PRESS ENTER OR A, OR CLICK START', 8, TEXT.dim);
@@ -73,7 +75,7 @@ export class TitleScene extends Phaser.Scene {
       this.add.text(x + 4, 160, actions, { fontFamily: FONT, fontSize: '8px', color: TEXT.dim, lineSpacing: 2 }).setDepth(depth);
     };
     if (touchScreen) {
-      column(cx, 'TOUCH', 'LEFT THUMB\nRIGHT THUMB\nANYWHERE\nTAP', 'D-PAD: HOP\nHOP FORWARD\nSWIPE TO HOP\nSOUND, TOP RIGHT');
+      column(cx, 'TOUCH', 'D-PAD\nHOP\nSWIPE\nTAP\nSPEAKER', 'HOP\nHOP FORWARD\nHOP THAT WAY\nHOP FORWARD\nSOUND, TOP RIGHT IN GAME');
       return;
     }
     column(112, 'KEYBOARD + MOUSE', 'ARROWS / WASD\nSPACE\nCLICK\nM', 'HOP\nHOP FORWARD\nHOP TOWARD IT\nSOUND ON/OFF');

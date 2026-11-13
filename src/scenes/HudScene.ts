@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, FONT, HOGLET, HUD_H, HUD_SCALE, HUD_STATE, MIRROR, TEXT, WIDTH, type Leg } from '../config';
+import { COLORS, FONT, HEIGHT, HOGLET, HUD_H, HUD_SCALE, HUD_STATE, MIRROR, TEXT, WIDTH, type Leg } from '../config';
 import type { Device } from '../controls';
 import { MUTED, toggleMute } from '../sfx';
 import { fitCamera } from '../view';
@@ -15,6 +15,8 @@ export interface HudState {
   /** Hop combo multiplier; 0 or 1 shows nothing. */
   combo: number;
   device: Device;
+  /** Set when the last life is gone: the game-over panel shows. */
+  over: { newHi: boolean } | null;
 }
 
 // HUD space is the design size × HUD_SCALE (832×496): sprites drawn here at native 16 px come out half the size
@@ -25,9 +27,16 @@ const MAX_ICONS = 6;
 const HINTS: Record<Device, string> = {
   kbm: 'ARROWS / WASD HOP  ·  SPACE FORWARD  ·  M SOUND',
   pad: 'D-PAD HOP  ·  A FORWARD  ·  Y SOUND',
-  touch: 'D-PAD OR SWIPE TO HOP',
+  touch: 'D-PAD OR SWIPE TO HOP  ·  TAP TO HOP FORWARD',
+};
+const OVER_HINTS: Record<Device, string> = {
+  kbm: 'ENTER RETRY  ·  ESC TITLE',
+  pad: 'A RETRY  ·  BACK TITLE',
+  touch: 'TAP A BUTTON',
 };
 const LINE1 = 6, LINE2 = 26;
+/** Game-over panel, centred on the field. Buttons are 48 units tall: 36 CSS px or more on a landscape phone. */
+const PANEL = { x: W / 2, y: BAR + (HEIGHT * S - BAR) / 2, w: 380, h: 208 };
 const TIMER = { x: 640, y: LINE2 + 2, w: 152, h: 12 };
 const SPEAKER = { x: W - 28, y: 4, w: 20, h: 16 };
 
@@ -43,6 +52,10 @@ export class HudScene extends Phaser.Scene {
   private dynamic!: Phaser.GameObjects.Graphics;
   private icons: Phaser.GameObjects.Image[] = [];
   private shownLives = -1;
+  private overPanel!: Phaser.GameObjects.Container;
+  private overScore!: Phaser.GameObjects.Text;
+  private overHi!: Phaser.GameObjects.Text;
+  private overHint!: Phaser.GameObjects.Text;
 
   constructor() {
     super('hud');
@@ -69,9 +82,38 @@ export class HudScene extends Phaser.Scene {
     label(TIMER.x - 8, LINE2, 'TIME').setOrigin(1, 0);
     this.dynamic = this.add.graphics();
 
-    // Phones have no M key: the speaker is a tap target, padded for a thumb.
-    this.add.zone(SPEAKER.x - 12, 0, SPEAKER.w + 24, BAR / 2 + 4).setOrigin(0).setInteractive({ useHandCursor: true })
+    // Phones have no M key: the speaker is a tap target, padded for a thumb (64 × 48 units: about 50 × 38 CSS px).
+    this.add.zone(W - 64, 0, 64, BAR).setOrigin(0).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => toggleMute(this));
+    this.buildOverPanel(label);
+  }
+
+  private buildOverPanel(label: (x: number, y: number, text: string, color?: string) => Phaser.GameObjects.Text) {
+    const crossing = () => this.scene.get('crossing') as unknown as { retry(): void; leave(): void };
+    const { x, y, w, h } = PANEL;
+    const bg = this.add.graphics();
+    bg.fillStyle(COLORS.void, 0.55).fillRect(0, BAR, W, HEIGHT * S - BAR);
+    bg.fillStyle(COLORS.panel, 0.96).fillRect(x - w / 2, y - h / 2, w, h);
+    bg.lineStyle(2, COLORS.line).strokeRect(x - w / 2, y - h / 2, w, h);
+    const title = this.add.text(x, y - h / 2 + 18, 'GAME OVER', { fontFamily: FONT, fontSize: '32px', color: TEXT.danger }).setOrigin(0.5, 0);
+    this.overScore = label(x, y - h / 2 + 64, '', TEXT.ink).setOrigin(0.5, 0);
+    this.overHi = label(x, y - h / 2 + 88, 'NEW HIGH SCORE!', TEXT.amber).setOrigin(0.5, 0);
+    const button = (bx: number, text: string, primary: boolean, act: () => void) => {
+      const bw = 140, bh = 48, by = y + h / 2 - 86;
+      const g = this.add.graphics();
+      if (primary) g.fillStyle(COLORS.amber).fillRect(bx - bw / 2, by, bw, bh);
+      else g.lineStyle(2, COLORS.ink).strokeRect(bx - bw / 2 + 1, by + 1, bw - 2, bh - 2);
+      const t = label(bx, by + bh / 2, text, primary ? '#070906' : TEXT.ink).setOrigin(0.5);
+      const zone = this.add.zone(bx - bw / 2, by, bw, bh).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerdown', act);
+      return [g, t, zone];
+    };
+    this.overHint = label(x, y + h / 2 - 26, '').setOrigin(0.5, 0);
+    this.overPanel = this.add.container(0, 0, [
+      bg, title, this.overScore, this.overHi,
+      ...button(x - 80, 'RETRY', true, () => crossing().retry()),
+      ...button(x + 80, 'TITLE', false, () => crossing().leave()),
+      this.overHint,
+    ]).setVisible(false);
   }
 
   update() {
@@ -82,6 +124,13 @@ export class HudScene extends Phaser.Scene {
     this.combo.setVisible(s.combo > 1).setText(`x${s.combo}`);
     this.night.setText(`NIGHT ${s.night}  ·  ${s.leg === 'out' ? 'OUT' : 'BACK'}`);
     this.hint.setText(HINTS[s.device]);
+    this.overPanel.setVisible(!!s.over);
+    for (const obj of this.overPanel.list) if (obj instanceof Phaser.GameObjects.Zone) obj.input!.enabled = !!s.over;
+    if (s.over) {
+      this.overScore.setText(`SCORE ${pts(s.score)}`);
+      this.overHi.setVisible(s.over.newHi && Math.floor(this.time.now / 300) % 2 === 0);
+      this.overHint.setText(OVER_HINTS[s.device]);
+    }
 
     if (s.lives !== this.shownLives) {
       this.shownLives = s.lives;

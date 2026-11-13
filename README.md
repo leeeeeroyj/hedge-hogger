@@ -14,7 +14,7 @@ A lane-crossing arcade game about a hedgehog family, a country road and a canal.
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![Hedge-Hogger at dusk: five hoglets wait in their burrows below a five-lane road of tractors, cars, motorbikes, vans and lorries with their headlights on, and beyond it a canal of logs, duck families, narrowboats and lily pads, then the towpath and the empty orchard nests](docs/screenshot.png)
+![Hedge-Hogger at dusk: a hoglet rides a log across the canal, two of its siblings are already in their orchard nests at the top, and two more wait in the garden burrows below a five-lane road of tractors, cars, motorbikes, vans and lorries with their headlights on](docs/screenshot.png)
 
 </div>
 
@@ -25,34 +25,63 @@ Hedge-Hogger is an original arcade game inspired by the mechanics of Konami's 19
 - **There and back.** Every night is two legs: out to the orchard nests at dusk, then home to the garden burrows in the dark.
 - **Lanes you can learn.** Each leg's traffic, boats and ducks are laid out from a seed, so a retry repeats the layout and the next leg brings a new one.
 - **A country crossing.** Tractors towing hay, motorbikes, vans and lorries on the road; narrowboats, logs, lily pads and duck families that dive on the canal.
-- **Warning before harm.** Headlights reach ahead of every vehicle after dark, and diving ducks bob and ripple before they go under.
+- **Warning before harm.** Headlights reach ahead of every vehicle after dark, diving ducks bob and ripple before they go under, the heron's pad glints before it stabs, and the farmer's torch comes before the farmer.
+- **Gentle on motion.** If your system asks for reduced motion, the screen never shakes or flashes.
 - **Sound with no audio files.** Sound effects are generated in code, sfxr style, when the game loads.
 
 ## Status
 
-**Milestone 1 of 7: the skeleton.** The title screen and the crossing run, with all nine lanes moving at dusk (out) and at night (back). The hoglet waits in its burrow; hopping comes next.
+**Milestone 6 of 7: touch and mobile.** The whole game, night after night, out and back, with sound, banners, sparks, fireflies and dawn light, and now playable on a phone held sideways: a d-pad and a HOP button, or swipe and tap.
 
 Still to come:
-2. **First playable:** hopping, riding the logs and boats, getting hit or falling in, the five homes, the timer, score and lives.
-3. **The full roster:** diving ducks, the heron, the fox, the farmer, the field mouse and the beetle.
-4. **Structure:** out and back legs, nights getting harder, the hop combo, extra lives, game over and retry.
-5. **HUD and feedback:** banners, sounds, sparks and splashes, fireflies and dawn light.
-6. **Touch and mobile:** an on-screen d-pad, a HOP button and swipes.
 7. **Polish:** a fairness check on every layout and a balance pass.
 
 ## How to play
 
-From the bottom of the screen: the garden hedge with five burrows, a verge, a five-lane road, the middle verge, a four-lane canal, the towpath, and the orchard hedge with five nests. On the out leg each hoglet crosses from a burrow to a nest; on the back leg they come home the other way. The full rules arrive with milestone 2.
+From the bottom of the screen: the garden hedge with five burrows, a verge, a five-lane road, the middle verge, a four-lane canal, the towpath, and the orchard hedge with five nests. On the out leg each hoglet crosses from a burrow to a nest; on the back leg they come home the other way.
+
+- **Hop one tile at a time.** The verges and the towpath are safe.
+- **The road:** anything with wheels bumps the hoglet. Watch the headlights.
+- **The canal:** the water is deep. Ride the logs, narrowboats, lily pads and duck families, and don't let them carry you off the edge of the screen.
+- **Homes:** hop into an empty nest (or burrow, on the way back). The hedge between homes, and a home that's already full, just bump you back.
+- **The clock:** each hoglet has 30 seconds. You start with 3 lives, and get another at 10,000 points and every 20,000 after that.
+- **The hop combo:** hop forward again within half a second of landing: ×2, ×3, up to ×4. It multiplies hop and home points. Stopping or hopping back ends it.
+- **Nights:** get all five across and the next leg begins. A night is out at dusk and back in the dark; each leg is a little faster than the last, and the fox and the farmer join from night 2.
+- **Game over:** retry the same leg from zero (the lanes come back exactly as they were), or go back to the title.
+
+**Who's about**
+
+| | |
+| --- | --- |
+| **Duck families** | Safe to ride, but some dive. They bob and ripple first, then the water's open. |
+| **Heron** | Walks the towpath and is deadly to touch. When it crouches the lily pad below it glints, then it stabs down. |
+| **Fox** | From night 2, paces the middle verge. Wait for it to pass. |
+| **Farmer** | From night 2, a torch beam and a **!** warn that he's coming. He follows you over the verges and the road, but if a vehicle comes through his lane he dives for the verge and gives up. |
+| **Field mouse** | Rides a log or a narrowboat. Hop on next to it and it climbs onto your back. |
+| **Beetle** | Turns up in an empty home for a few seconds. |
+
+| | Points |
+| --- | --- |
+| Each new row reached | 10 × combo |
+| A hoglet home | 50 × combo, + 10 for every half second left |
+| All five home | 1,000 |
+| Farmer honked off the road | 300 |
+| Field mouse brought home | 200 |
+| Beetle in the home you reach | 200 |
 
 ## Controls
 
 | | Keyboard + mouse | Controller | Touch |
 | --- | --- | --- | --- |
+| Hop | Arrows or WASD (hold to keep hopping) | D-pad or left stick | The on-screen d-pad (hold to keep hopping), or swipe |
+| Hop forward | Space | A | **HOP**, or tap anywhere on the field |
+| Hop toward a spot | Click it | — | — |
 | Start | Enter or Space, or click **START** | A or Start | Tap **START** |
 | Sound on / off | M, or click the speaker (top right) | Y | Tap the speaker |
-| Back to the title | Esc | Back | — |
+| Retry after game over | Enter or Space, or click **RETRY** | A or Start | Tap **RETRY** |
+| Back to the title | Esc, or click **TITLE** after game over | Back | Tap **TITLE** after game over |
 
-Hopping (arrows or WASD, D-pad or stick, and touch) arrives with milestone 2. Controllers show up once you press a button.
+"Forward" means toward the hedge you're heading for: up the screen on the way out, down on the way back. Controllers show up once you press a button. On a phone, play in landscape: the d-pad and HOP sit beside the game on wide screens and over its bottom corners otherwise.
 
 ## Run it locally
 
@@ -73,9 +102,12 @@ src/
   main.ts            game setup
   config.ts          tunables: screen, rows, lanes, difficulty ramp, palettes
   lanes.ts           seeded lane layouts and the lane rules
+  critters.ts        fox, heron, farmer, field mouse and beetle
   backdrop.ts        hedges, verges, road, logs and narrowboats, drawn in code
   laneView.ts        the moving lanes on screen
   controls.ts        keyboard, mouse and gamepad input
+  touch.ts           on-screen d-pad, HOP, swipes and taps
+  effects.ts         sparks, rings, shake and flash
   sfx.ts             procedural sound effects
   scenes/            title screen, the crossing and the HUD
 assets/sprites/      the game's 16 × 16 sprites
@@ -83,6 +115,7 @@ design/              concept sheet and build plan
 tools/sprites.py     sprite search and export script
 tools/cdp.mjs        headless Chrome harness for the tests
 tools/m*-test.mjs    checks for each milestone
+tools/fairness.mjs   checks every seeded layout can be crossed in time
 ```
 
 ## Credits

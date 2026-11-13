@@ -4,7 +4,8 @@ import { boatKey, logKey } from './backdrop';
 import { duckState, itemX, type Item, type Lane } from './lanes';
 
 /** Depths shared by every scene that draws the crossing. Headlights sit above the tint so they glow. */
-export const DEPTH = { water: 0, field: 1, homes: 2, platforms: 3, vehicles: 4, critters: 6, hoglet: 7, tint: 9, lights: 10, banner: 5 } as const;
+/** Draw order. Banners sit under every sprite so the hoglet and the hazards stay readable through them. */
+export const DEPTH = { water: 0, field: 1, homes: 2, banner: 2.5, platforms: 3, vehicles: 4, critters: 6, hoglet: 7, fx: 8, tint: 9, lights: 10, pops: 11 } as const;
 
 /** A sprite drawn facing `right` (or left), whatever way its art faces. */
 export function face(img: Phaser.GameObjects.Image, key: SpriteKey, right: boolean) {

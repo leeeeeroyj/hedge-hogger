@@ -27,6 +27,24 @@ export interface Voice {
 export const SOUNDS = {
   select: { wave: 'square', freq: 880, sustain: 0.04, decay: 0.04, duty: 0.5, volume: 0.2 },
   start: { wave: 'square', freq: 440, steps: [0, 7, 12, 19], sustain: 0.28, decay: 0.1, duty: 0.25, volume: 0.3 },
+  hop: { wave: 'square', freq: 420, slide: 2.5, sustain: 0.02, decay: 0.05, duty: 0.25, volume: 0.1 },
+  combo: { wave: 'square', freq: 660, steps: [0, 7], sustain: 0.06, decay: 0.05, duty: 0.25, volume: 0.14 },
+  bump: { wave: 'square', freq: 160, slide: -1.5, sustain: 0.03, decay: 0.06, duty: 0.5, volume: 0.18 },
+  squash: { wave: 'noise', freq: 900, slide: -2, sustain: 0.05, decay: 0.35, volume: 0.5 },
+  splash: { wave: 'noise', freq: 520, slide: -1.2, sustain: 0.08, decay: 0.45, smooth: 0.35, volume: 0.5 },
+  peck: { wave: 'square', freq: 1500, slide: -5, sustain: 0.02, decay: 0.08, duty: 0.4, volume: 0.22 },
+  growl: { wave: 'saw', freq: 95, vibrato: [18, 0.15], sustain: 0.25, decay: 0.2, smooth: 0.4, volume: 0.35 },
+  shout: { wave: 'square', freq: 330, steps: [0, -5], sustain: 0.22, decay: 0.12, duty: 0.4, volume: 0.22 },
+  honk: { wave: 'square', freq: 349, vibrato: [30, 0.02], sustain: 0.22, decay: 0.06, duty: 0.5, smooth: 0.5, volume: 0.25 },
+  stab: { wave: 'noise', freq: 2200, slide: -4, sustain: 0.02, decay: 0.12, smooth: 0.5, volume: 0.25 },
+  warn: { wave: 'square', freq: 1200, steps: [0, 5, 0, 5], sustain: 0.32, duty: 0.5, volume: 0.1 },
+  squeak: { wave: 'sine', freq: 1800, slide: 1.2, sustain: 0.04, decay: 0.05, volume: 0.25 },
+  home: { wave: 'triangle', freq: 660, steps: [0, 4, 7], sustain: 0.16, decay: 0.12, volume: 0.45 },
+  bonus: { wave: 'square', freq: 880, steps: [0, 7, 12], sustain: 0.12, decay: 0.08, duty: 0.25, volume: 0.28 },
+  tick: { wave: 'square', freq: 1000, sustain: 0.015, decay: 0.02, duty: 0.5, volume: 0.12 },
+  extraLife: { wave: 'triangle', freq: 523.25, steps: [0, 4, 7, 12, 7, 12], sustain: 0.6, decay: 0.15, volume: 0.5 },
+  allHome: { wave: 'square', freq: 523.25, steps: [0, 4, 7, 12, 16, 19, 24], sustain: 0.7, decay: 0.3, duty: 0.25, volume: 0.3 },
+  gameOver: { wave: 'square', freq: 392, steps: [0, -2, -4, -5, -7, -12], sustain: 1.1, decay: 0.4, duty: 0.5, volume: 0.25 },
 } satisfies Record<string, Voice>;
 
 export type SoundName = keyof typeof SOUNDS;

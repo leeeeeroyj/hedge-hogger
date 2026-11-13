@@ -22,6 +22,15 @@ export function bakeTextures(scene: Phaser.Scene) {
   for (const len of LANE_LEN.log) canvas(scene, logKey(len), len, TILE, (g) => drawLog(g, len));
   for (const len of LANE_LEN.boat) BOAT_PAINT.forEach((_, p) => canvas(scene, boatKey(len, p), len, TILE, (g) => drawBoat(g, len, p)));
   canvas(scene, 'trailer', 20, TILE, drawTrailer);
+  canvas(scene, 'curl', TILE, TILE, drawCurl);
+  // The farmer's torch: a soft cone, pointing right, that fades out over its reach.
+  canvas(scene, 'torch', 64, 18, (g) => {
+    const grad = g.createLinearGradient(0, 0, 64, 0);
+    grad.addColorStop(0, 'rgba(255,236,170,0.5)');
+    grad.addColorStop(1, 'rgba(255,236,170,0)');
+    g.fillStyle = grad;
+    g.beginPath(); g.moveTo(0, 8); g.lineTo(64, 0); g.lineTo(64, 18); g.lineTo(0, 11); g.fill();
+  });
   canvas(scene, 'headlight', 34, TILE, (g) => {
     const grad = g.createLinearGradient(0, 0, 34, 0);
     grad.addColorStop(0, 'rgba(255,200,100,0.7)');
@@ -90,6 +99,14 @@ function drawTrailer(g: CanvasRenderingContext2D) {
   const fill = (c: string, x: number, y: number, w: number, h: number) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
   fill('#7a5a2a', 0, 5, 20, 8); fill('#d8b860', 1, 3, 8, 6); fill('#c9a850', 10, 3, 8, 6);
   fill('#2a2420', 3, 13, 3, 2); fill('#2a2420', 14, 13, 3, 2);
+}
+
+/** A hoglet curled into a ball of spines: what's left on the road after a bump. */
+function drawCurl(g: CanvasRenderingContext2D) {
+  const fill = (c: string, x: number, y: number, w: number, h: number) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  fill('#5a3a24', 4, 5, 8, 8); fill('#5a3a24', 3, 6, 10, 6); fill('#8a5a3a', 5, 5, 6, 2); fill('#8a5a3a', 4, 6, 2, 2);
+  for (const [x, y] of [[3, 4], [6, 3], [9, 3], [12, 4], [2, 8], [13, 8], [3, 12], [12, 12], [7, 13]]) fill('#3a2414', x, y, 1, 1);
+  fill('#e3c9a0', 11, 10, 2, 2);
 }
 
 /** The canal: water colour plus a slow shimmer that drifts with each lane. Redrawn every frame. */

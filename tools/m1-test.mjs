@@ -23,7 +23,7 @@ await shot('2-crossing-out');
 const cfg = await evaluate(`(async () => { const c = await import('/src/config.ts'); return { homes: c.HOMES, burrowY: c.rowMid(c.ROW.burrows), nestY: c.rowMid(c.ROW.nests), span: c.LANE_SPAN }; })()`);
 const s0 = await evaluate(`${C}.snapshot()`);
 check('nine lanes laid out for night 1, out', s0.lanes.length === 9 && s0.night === 1 && s0.leg === 'out', `${s0.lanes.length} lanes`);
-check('hoglet waits in the first burrow', s0.hoglet.x === cfg.homes[0] && s0.hoglet.y === cfg.burrowY, JSON.stringify(s0.hoglet));
+check('hoglet waits in the first burrow', s0.sprite.x === cfg.homes[0] && s0.sprite.y === cfg.burrowY, JSON.stringify(s0.sprite));
 check('out leg starts with the burrows full and the nests empty', s0.burrows.join('') === '11111' && s0.nests.join('') === '00000');
 
 // Every lane moves in its own direction at its own speed.
@@ -63,14 +63,14 @@ check('diving ducks go up, warn, under; under is open water', seeded.duckStates 
 check('later legs run faster', seeded.faster);
 
 const hud = await evaluate(`${G}.registry.get('hud')`);
-check('HUD state: night 1, out, 3 lives, full timer', hud.night === 1 && hud.leg === 'out' && hud.lives === 3 && hud.time === 30, JSON.stringify(hud));
+check('HUD state: night 1, out, 3 lives, timer running from 30', hud.night === 1 && hud.leg === 'out' && hud.lives === 3 && hud.time > 25 && hud.time < 30, JSON.stringify(hud));
 
 // The back leg: night palette, nests full, the hoglet waits in the first nest facing down-screen.
 await evaluate(`${C}.setLeg('back', 1)`);
 await sleep(600);
 await shot('3-crossing-back');
 const s2 = await evaluate(`${C}.snapshot()`);
-check('back leg starts from the nests', s2.leg === 'back' && s2.nests.join('') === '11111' && s2.burrows.join('') === '00000' && s2.hoglet.y === cfg.nestY, JSON.stringify(s2.hoglet));
+check('back leg starts from the nests', s2.leg === 'back' && s2.nests.join('') === '11111' && s2.burrows.join('') === '00000' && s2.sprite.y === cfg.nestY, JSON.stringify(s2.sprite));
 const hud2 = await evaluate(`${G}.registry.get('hud')`);
 check('HUD follows the leg', hud2.leg === 'back');
 

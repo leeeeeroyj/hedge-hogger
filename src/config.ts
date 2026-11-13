@@ -58,14 +58,65 @@ export const LANE_MARGIN = 64;
 /**
  * Difficulty per leg. `index` counts legs from 0 (night 1 out = 0, night 1 back = 1, night 2 out = 2...).
  * Speeds grow by `speed` per leg, gaps shrink by `gap` per leg down to `minGap`, and more duck families dive.
+ * The farmer's waits shrink by `farmer` per leg, down to `minFarmer` of their night-2 length.
  */
-export const RAMP = { speed: 0.08, gap: 0.03, minGap: 0.7, diveChance: 0.45, diveStep: 0.04, maxDive: 0.8 };
+export const RAMP = { speed: 0.08, gap: 0.03, minGap: 0.7, diveChance: 0.45, diveStep: 0.04, maxDive: 0.8, farmer: 0.06, minFarmer: 0.5 };
 export const legIndex = (night: number, leg: Leg) => (night - 1) * 2 + (leg === 'back' ? 1 : 0);
 
 /** Duck families that dive: up, then a bob-and-ripple warning, then under, on a loop. Seconds into `cycle`. */
 export const DUCK = { cycle: 6.5, warn: 4.3, under: 5.2, up: 6.4 };
 
-export const HOGLET = { lives: 3, time: 30, hopTime: 0.11 };
+/**
+ * The hoglet. `lives` counts tries left including the one crossing now. A hop takes `hopTime` seconds and lifts
+ * `lift` pixels at its peak. Holding a direction repeats the hop after `repeatDelay`, then every `repeatEvery`.
+ * `deadTime` is the pause after a death before the next try; `blink` how long a fresh hoglet blinks.
+ * `homeSnap` is how far off a home's centre a hop into the hedge still lands in it. A forward hop within
+ * `comboWindow` of landing raises the combo, up to `comboMax`. `legPause` is the breather after all five get home.
+ */
+export const HOGLET = { lives: 3, time: 30, hopTime: 0.11, lift: 4, repeatDelay: 0.22, repeatEvery: 0.15, deadTime: 1.2, blink: 1, homeSnap: 11, edge: 4, comboWindow: 0.5, comboMax: 4, legPause: 1.8 };
+
+/** Extra lives at `first` points, then every `every` after that. */
+export const EXTRA_LIFE = { first: 10000, every: 20000 };
+/** localStorage key for the high score. */
+export const HI_STORAGE = 'hedge-hogger-hi';
+
+/** Points. `row` is per new row reached; `timeBonus` is per half second left when a hoglet gets home. */
+export const POINTS = { row: 10, home: 50, timeBonus: 10, allHome: 1000, honk: 300, mouse: 200, beetle: 200 };
+
+/**
+ * Hazards and bonuses. Times in seconds, speeds in design pixels per second, `hit` is the half-width of a touch.
+ * Fox: paces the middle verge from night `fromNight`. Heron: walks the towpath, then crouches (the pad below glints),
+ * then stabs the lily lane. Farmer: from night `fromNight`, a torch and "!" warn for `warn`, then he chases one tile
+ * every `step` for `chase` seconds over the verges and road (or along the towpath), then leaves. A vehicle in his
+ * lane sends him diving back to the verge. Mouse: rides a log or boat until a hoglet lands near it. Beetle: sits in
+ * an empty home for `stay` seconds, every `every` seconds; it blinks for the last `warn`.
+ */
+export const CRITTERS = {
+  fox: { speed: 26, min: 24, max: WIDTH - 24, hit: 10, fromNight: 2 },
+  heron: { speed: 9, min: 40, max: WIDTH - 40, firstWalk: 1.5, walk: 3.2, crouch: 0.75, strike: 0.35, hit: 9, stab: 10 },
+  farmer: { fromNight: 2, firstDelay: 7, delay: [12, 18] as const, warn: 1.3, chase: 9, step: 0.42, leaveStep: 0.22, hitX: 10, hitY: 8 },
+  mouse: { lanes: [5, 3] as const, grab: 14, firstWait: 1, wait: 6, dropWait: 2 },
+  beetle: { first: 4, every: 10, stay: 6, warn: 1.5 },
+};
+
+/**
+ * Feedback. Bursts are [sparks, speed px/s, life ms]; `shake` is in game pixels and `flash` a white alpha (both off
+ * under prefers-reduced-motion). Banners hold for `banner` seconds. Fireflies per leg; `dawn` is how far the back
+ * leg's light warms toward morning once all five are home, in steps as each one arrives.
+ */
+export const FX = {
+  dust: [3, 30, 260] as const,
+  bump: [22, 90, 520] as const,
+  splash: [16, 60, 600] as const,
+  home: [16, 80, 600] as const,
+  honk: [12, 70, 450] as const,
+  shake: { death: 2.5, honk: 1.2 },
+  flash: 0.22,
+  banner: 1.6,
+  fireflies: { out: 5, back: 14 },
+  dawn: { tint: 0xff9a5c, alpha: 0.12, reach: 0.75 },
+  timerTick: 5,
+};
 
 /** Narrowboat paintwork: [hull, trim]. */
 export const BOAT_PAINT = [[0x2f6b3a, 0xb8433d], [0x7a2a2a, 0xe9c46a], [0x24476b, 0xe07a3a], [0x4a2f5e, 0x6cc3c8]] as const;

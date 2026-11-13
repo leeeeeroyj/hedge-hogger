@@ -29,12 +29,15 @@ export async function session({ project, out, port, debugPort, width = 1664, hei
   mkdirSync(out, { recursive: true });
   const results = [];
   const errors = [];
-  const vite = spawn('npx', ['vite', '--port', String(port), '--strictPort'], { cwd: project, stdio: ['ignore', 'pipe', 'pipe'] });
+  // A server already on the port would be tested in place of this checkout: refuse instead.
+  if (await fetch(`http://localhost:${port}/`).then(() => true, () => false)) throw new Error(`port ${port} is already in use`);
+  // Own process groups, so cleanup takes the children too (npx leaves vite running if only npx is killed).
+  const vite = spawn('npx', ['vite', '--port', String(port), '--strictPort'], { cwd: project, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   const chrome = spawn('google-chrome', [
     '--headless=new', '--no-sandbox', '--hide-scrollbars', '--mute-audio', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
     `--remote-debugging-port=${debugPort}`, `--user-data-dir=${out}/profile`, `--window-size=${width},${height}`, 'about:blank',
-  ], { stdio: 'ignore' });
-  const cleanup = () => { try { vite.kill(); } catch {} try { chrome.kill(); } catch {} };
+  ], { stdio: 'ignore', detached: true });
+  const cleanup = () => { for (const p of [vite, chrome]) { try { process.kill(-p.pid, 'SIGTERM'); } catch {} } };
   process.on('exit', cleanup);
 
   await until(async () => (await fetch(`http://localhost:${port}/`)).ok);
@@ -64,6 +67,12 @@ export async function session({ project, out, port, debugPort, width = 1664, hei
   const down = (k) => key('rawKeyDown', k);
   const up = (k) => key('keyUp', k);
   const tap = async (k, ms = 80) => { await down(k); await sleep(ms); await up(k); };
+
+  const click = async (x, y) => {
+    for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) {
+      await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mousePressed' ? 1 : 0, clickCount: 1 });
+    }
+  };
 
   // Every touch event carries every finger still down: start when one is added, move when one moves or one of
   // several lifts, end only when the last one lifts.
@@ -99,5 +108,5 @@ export async function session({ project, out, port, debugPort, width = 1664, hei
   }
   await send('Page.navigate', { url: `http://localhost:${port}/` });
 
-  return { send, evaluate, until, shot, down, up, tap, press, move, lift, check, done, errors, sleep };
+  return { send, evaluate, until, shot, down, up, tap, click, press, move, lift, check, done, errors, sleep };
 }

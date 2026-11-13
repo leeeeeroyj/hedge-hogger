@@ -3,7 +3,7 @@
 import { DUCK, LANE_GAP, LANE_LEN, LANE_MARGIN, LANE_SPAN, LANES, RAMP, ROW, WIDTH, legIndex, type LaneKind, type Leg } from './config';
 
 export interface Item {
-  /** Left edge in design pixels, in [-LANE_MARGIN, WIDTH + LANE_MARGIN). */
+  /** Left edge in design pixels. `itemX` gives it wrapped into [WIDTH - LANE_SPAN, WIDTH). */
   x: number;
   len: number;
   /** Duck families: whether this one dives, and its phase in the dive cycle. */
@@ -66,10 +66,10 @@ export function layout(night: number, leg: Leg): Lane[] {
 
 /** Where an item's left edge will be after `dt` seconds, wrapped into the lane's span. */
 export function itemX(lane: Lane, item: Item, dt = 0) {
-  let x = item.x + lane.dir * lane.speed * dt;
-  while (x > WIDTH + LANE_MARGIN) x -= LANE_SPAN;
-  while (x + item.len < -LANE_MARGIN) x += LANE_SPAN;
-  return x;
+  // Kept in [WIDTH - LANE_SPAN, WIDTH): an item only jumps a span while it's wholly off screen, either way it moves,
+  // as long as it's at most LANE_SPAN - WIDTH (128 px) long.
+  const x = item.x + lane.dir * lane.speed * dt - (WIDTH - LANE_SPAN);
+  return (((x % LANE_SPAN) + LANE_SPAN) % LANE_SPAN) + (WIDTH - LANE_SPAN);
 }
 
 /** Moves every item along its lane. */
