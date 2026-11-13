@@ -1,0 +1,1142 @@
+<title>Hedge-Hogger Concept Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Layout: a roadside warning-sign briefing. The live crossing leads, then the hoglet, the road, the canal, the land, the bonuses, and the rules of a night. Single dusk look by choice. */
+:root {
+  --night: #10140f;     /* page ground: hedgerow after sunset */
+  --panel: #192018;     /* raised surfaces */
+  --line: #2f3b2c;      /* hairlines, empty cells */
+  --ink: #f1ead6;       /* primary text */
+  --dim: #a8af99;       /* secondary text */
+  --amber: #ffb648;     /* accent: headlights, title, points, selection */
+  --canal: #6cc3c8;     /* water, things that are on */
+  --sign: #e0453a;      /* warning-triangle red, danger */
+  --font-display: "Lilita One", "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Verdana", system-ui, sans-serif;
+  --font-pixel: "Silkscreen", "Courier New", monospace;
+  --step--1: 0.8125rem; --step-0: 1.0625rem; --step-1: 1.25rem; --step-2: 1.875rem; --step-3: clamp(2.6rem, 8.5vw, 5rem);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 1264px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; }
+h3, .label { font-family: var(--font-pixel); font-weight: 400; margin: 0; }
+h1 { font-size: var(--step-3); line-height: 0.95; letter-spacing: 0.01em; color: var(--amber); }
+h2 { font-size: var(--step-2); line-height: 1.1; letter-spacing: 0.01em; }
+h3 { font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; }
+p { margin: 0; }
+.label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.muted { color: var(--dim); }
+
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; padding-top: 40px; }
+.title-row { display: flex; align-items: center; gap: 20px; margin-top: 8px; }
+/* The roadside "hedgehogs crossing" triangle, with the picked sprite inside. */
+.sign { position: relative; width: 92px; height: 82px; flex: none; }
+.sign::before { content: ""; position: absolute; inset: 0; background: var(--sign); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.sign::after { content: ""; position: absolute; inset: 11px 12px 6px; background: var(--ink); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.sign img { position: absolute; left: 50%; bottom: 10px; width: 32px; height: 32px; margin-left: -16px; image-rendering: pixelated; z-index: 1; }
+.sign img.flip { transform: scaleX(-1); }
+header.top .pitch { max-width: 62ch; margin-top: 14px; color: var(--dim); font-size: var(--step-1); line-height: 1.4; }
+.actions { display: grid; gap: 8px; justify-items: end; }
+button.primary {
+  font-family: var(--font-pixel); font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--amber); color: var(--night); border: 0; padding: 12px 18px; cursor: pointer;
+  box-shadow: 4px 4px 0 var(--line);
+}
+button.primary:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--line); }
+button:focus-visible, canvas:focus-visible { outline: 2px solid var(--canal); outline-offset: 3px; }
+#copy-status { font-size: var(--step--1); color: var(--dim); min-height: 1.5em; }
+#picks-text { width: min(420px, 100%); height: 120px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); font: 12px/1.4 monospace; }
+
+/* Screen */
+.screen-block { display: grid; gap: 16px; }
+.bezel { background: #070906; border: 1px solid var(--line); padding: clamp(6px, 1.5vw, 16px); box-shadow: 0 0 0 4px var(--panel), 0 24px 60px -30px #000; }
+#screen { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 416 / 248; image-rendering: pixelated; touch-action: none; }
+.controls { display: grid; gap: 10px; }
+.keys { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; }
+.keys > .label { min-width: 96px; }
+.key { display: inline-flex; gap: 4px; align-items: center; }
+kbd {
+  font-family: var(--font-pixel); font-size: 0.75rem; min-width: 26px; padding: 4px 6px; text-align: center;
+  background: var(--panel); border: 1px solid var(--line); border-bottom-width: 3px; color: var(--ink);
+}
+.pad-status { font-size: var(--step--1); color: var(--dim); }
+.pad-status[data-on="true"] { color: var(--canal); }
+.seg { display: inline-flex; border: 1px solid var(--line); }
+.seg button { font-family: var(--font-pixel); font-size: 0.75rem; background: var(--panel); color: var(--dim); border: 0; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--amber); color: var(--night); }
+.screen-notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px 24px; }
+.screen-notes div { display: grid; gap: 2px; min-width: 0; }
+
+/* Slot panels */
+.section { display: grid; gap: 20px; }
+.section-head { display: grid; gap: 6px; max-width: 70ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); padding: 16px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.card-head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.hero-sprite { width: 96px; height: 96px; image-rendering: pixelated; background: var(--night); border: 1px solid var(--line); }
+.hero-sprite.flip, .sizes img.flip { transform: scaleX(-1); }
+.card-title { display: grid; gap: 4px; min-width: 0; justify-items: start; }
+.chip { font-family: var(--font-pixel); font-size: 0.75rem; color: var(--night); background: var(--amber); padding: 2px 6px; font-variant-numeric: tabular-nums; }
+.chip.danger { background: transparent; color: var(--sign); border: 1px solid var(--sign); }
+.card p { font-size: 1rem; line-height: 1.45; }
+.card-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mirror { font-family: var(--font-pixel); font-size: 0.6875rem; background: transparent; color: var(--dim); border: 1px solid var(--line); padding: 3px 8px; cursor: pointer; }
+.mirror[aria-pressed="true"] { color: var(--canal); border-color: var(--canal); }
+.cands { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cand { padding: 0; aspect-ratio: 1; background: var(--night); border: 1px solid var(--line); cursor: pointer; display: grid; place-items: center; }
+.cand img { width: 75%; height: 75%; image-rendering: pixelated; }
+.cand:hover { border-color: var(--dim); }
+.cand[aria-pressed="true"] { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
+.meta { font-size: var(--step--1); color: var(--dim); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.sizes { display: flex; gap: 12px; align-items: end; }
+.sizes figure { margin: 0; display: grid; gap: 4px; justify-items: center; }
+.sizes img { image-rendering: pixelated; background: var(--night); }
+.sizes figcaption { font-size: 0.75rem; color: var(--dim); }
+#hog-grid { grid-template-columns: minmax(0, 720px); }
+#hog-grid .card { grid-template-columns: auto 1fr; align-items: start; gap: 14px 24px; }
+#hog-grid .card > .cands, #hog-grid .card > .card-tools { grid-column: 1 / -1; }
+#hog-grid .card > .cands { grid-template-columns: repeat(8, 1fr); }
+@media (max-width: 560px) { #hog-grid .card { grid-template-columns: 1fr; } #hog-grid .card > .cands { grid-template-columns: repeat(4, 1fr); } }
+
+/* Rules and comparison */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px 32px; }
+.rules div { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 12px; align-content: start; }
+.rules strong { font-family: var(--font-pixel); font-weight: 400; color: var(--amber); font-variant-numeric: tabular-nums; }
+.points { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0 32px; max-width: 900px; }
+.points div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.points span:last-child { font-family: var(--font-pixel); color: var(--amber); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.diff { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.diff div { background: var(--panel); border: 1px solid var(--line); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.diff ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: var(--step--1); color: var(--dim); display: grid; gap: 6px; }
+footer a { color: var(--canal); }
+@media (prefers-reduced-motion: reduce) { button.primary:active { transform: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="label">Concept sheet · v0.1</p>
+      <div class="title-row">
+        <div class="sign" aria-hidden="true"><img alt="" data-hero="player"></div>
+        <h1>HEDGE-HOGGER</h1>
+      </div>
+      <p class="pitch">A hedgehog mother has five hoglets and one night. At dusk she sees them over the lane and the canal to the orchard. Before dawn she has to bring every one of them back. Hop through the traffic, ride the boats and logs, keep clear of the fox, the heron and a farmer with a torch, and get each hoglet to the other side.</p>
+    </div>
+    <div class="actions">
+      <button class="primary" id="copy-picks" type="button">Copy my picks</button>
+      <span id="copy-status" role="status"></span>
+      <textarea id="picks-text" hidden readonly aria-label="Your picks as JSON"></textarea>
+    </div>
+  </header>
+
+  <section class="screen-block" aria-labelledby="screen-h">
+    <div class="section-head">
+      <h2 id="screen-h">Game screen</h2>
+      <p class="muted">A live mockup at the game's real resolution: 416&times;248, 16&nbsp;px tiles, 26 columns by 14 rows. It plays itself until you take over. Click the screen, then hop. Every sprite you pick below swaps in here.</p>
+    </div>
+    <div class="bezel"><canvas id="screen" width="416" height="248" tabindex="0" aria-label="Game screen mockup. Click it, then use the arrow keys or WASD to hop, or click beside the hoglet to hop that way."></canvas></div>
+    <div class="controls">
+      <div class="keys" aria-label="Keyboard and mouse">
+        <span class="label">Keyboard</span>
+        <span class="key"><kbd>&larr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd>&nbsp;or&nbsp;<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>&nbsp;hop</span>
+        <span class="key"><kbd>Space</kbd>&nbsp;hop forward</span>
+        <span class="key"><kbd>Click</kbd>&nbsp;hop toward the pointer</span>
+      </div>
+      <div class="keys" aria-label="Controller">
+        <span class="label">Controller</span>
+        <span class="key"><kbd>D-pad</kbd><kbd>L stick</kbd>&nbsp;hop</span>
+        <span class="key"><kbd>A</kbd>&nbsp;hop forward</span>
+        <span class="pad-status" id="pad-status" role="status">No controller yet. Press any button on it.</span>
+      </div>
+      <div class="keys" aria-label="Touch">
+        <span class="label">Touch</span>
+        <span class="key">Left thumb&nbsp;<kbd>&#9650;</kbd><kbd>&#9660;</kbd><kbd>&#9664;</kbd><kbd>&#9654;</kbd></span>
+        <span class="key">Right thumb&nbsp;<kbd>HOP</kbd>&nbsp;forward</span>
+        <span class="key">Or swipe anywhere</span>
+      </div>
+      <div class="keys">
+        <span class="label">Leg</span>
+        <span class="seg" role="group" aria-label="Leg"><button type="button" id="leg-out" data-leg="out" aria-pressed="true">Out · dusk</button><button type="button" id="leg-back" data-leg="back" aria-pressed="false">Back · night</button></span>
+        <span class="label">Touch buttons</span>
+        <span class="seg" role="group" aria-label="Touch buttons"><button type="button" id="touch-off" data-touch="off" aria-pressed="true">Hide</button><button type="button" id="touch-on" data-touch="on" aria-pressed="false">Show</button></span>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <div><span class="label">Top bar</span><span>Score and hop combo, high score, lives, night and leg. The second line holds the hint strip and the hoglet's timer, which runs from 30 seconds.</span></div>
+      <div><span class="label">Out and back</span><span>Out (dusk): hoglets leave the garden burrows at the bottom for the orchard nests at the top. Back (night into dawn): they return from the nests to the burrows.</span></div>
+      <div><span class="label">The crossing</span><span>From the bottom: garden hedge, verge, a five-lane road, the middle verge, a four-lane canal, the towpath, the orchard hedge. Everything except the sprites is drawn in code.</span></div>
+      <div><span class="label">Touch layout</span><span>On wide phones the d-pad and HOP sit in the bars beside the game. On 16:9 screens they overlay the bottom corners, where the hedge leaves room: the outer burrows sit inside them.</span></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hog-h">
+    <div class="section-head">
+      <h2 id="hog-h">The hoglet</h2>
+      <p class="muted">Seen side-on, facing right. It flips to face the way it last hopped and never rotates. If a pick faces left, press Mirror.</p>
+    </div>
+    <div class="grid" id="hog-grid"></div>
+  </section>
+
+  <section class="section" aria-labelledby="road-h">
+    <div class="section-head">
+      <h2 id="road-h">On the road</h2>
+      <p class="muted">Five lanes, alternating direction. One touch sends the hoglet curling back to where it started, and costs a life. After dark, headlights reach ahead of every vehicle, so you can see it coming.</p>
+    </div>
+    <div class="grid" id="road-grid"></div>
+  </section>
+
+  <section class="section" aria-labelledby="canal-h">
+    <div class="section-head">
+      <h2 id="canal-h">On the canal</h2>
+      <p class="muted">Hedgehogs can't swim this far. Ride what floats, and hop off before it carries you off the screen. Logs and narrowboats are drawn in code, with random lengths and paintwork. These three are sprites.</p>
+    </div>
+    <div class="grid" id="canal-grid"></div>
+  </section>
+
+  <section class="section" aria-labelledby="land-h">
+    <div class="section-head">
+      <h2 id="land-h">On the land</h2>
+      <p class="muted">The verges and the towpath are safe from traffic, but not from these two.</p>
+    </div>
+    <div class="grid" id="land-grid"></div>
+  </section>
+
+  <section class="section" aria-labelledby="bonus-h">
+    <div class="section-head">
+      <h2 id="bonus-h">Bonuses</h2>
+    </div>
+    <div class="grid" id="bonus-grid"></div>
+  </section>
+
+  <section class="section" aria-labelledby="rules-h">
+    <div class="section-head"><h2 id="rules-h">How a night plays</h2></div>
+    <div class="rules">
+      <div><strong>Out, then back</strong><span>A night is two legs. Out: get all five hoglets from the garden burrows to the orchard nests. Back: bring all five home again. Each leg is a new layout and a little harder.</span></div>
+      <div><strong>One hoglet at a time</strong><span>Each hoglet has 30 seconds. A hedge or a full home just bumps you back. A vehicle, the water, the fox, the heron, the farmer or the clock costs a life, and the hoglet goes back to its start.</span></div>
+      <div><strong>Hop combo</strong><span>Hop forward again within half a second of landing to build the combo: &times;2, &times;3, up to &times;4. It multiplies hop and home points. Stopping or hopping backward resets it.</span></div>
+      <div><strong>Seeded lanes</strong><span>Every leg is laid out from a seed: lane speeds, gaps, boat lengths, which duck families dive. A retry repeats it, so you can learn it. The next leg is new.</span></div>
+      <div><strong>Lives</strong><span>Start with 3. An extra life at 10,000, then every 20,000.</span></div>
+      <div><strong>The ramp</strong><span>Per leg: traffic and boats about 8% faster, gaps a little tighter, ducks dive more often, the farmer turns up sooner. The fox and the farmer join from night 2.</span></div>
+    </div>
+    <div class="points" aria-label="Points">
+      <div><span>Hop to a new row</span><span>10 &times; combo</span></div>
+      <div><span>Hoglet home</span><span>50 &times; combo</span></div>
+      <div><span>Time left, per half second</span><span>10</span></div>
+      <div><span>Beetle in the home</span><span>200</span></div>
+      <div><span>Field mouse escorted</span><span>200</span></div>
+      <div><span>Farmer honked off the road</span><span>300</span></div>
+      <div><span>All five home</span><span>1,000</span></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="diff-h">
+    <div class="section-head">
+      <h2 id="diff-h">From the arcade original</h2>
+      <p class="muted">Re-imagined from Konami's 1981 <em>Frogger</em>. The mechanics are borrowed. The setting, characters, art and layouts are new.</p>
+    </div>
+    <div class="diff">
+      <div><span class="label">Kept</span><ul>
+        <li>One-tile hops in four directions on a single screen</li>
+        <li>A road of alternating lanes, a safe strip, then water you cross on moving platforms</li>
+        <li>Five homes to fill, a timer per crossing, points for new rows and time left</li>
+        <li>Platforms that sink under you (turtles there, ducks here), and a bonus in a home</li>
+        <li>A friend to carry home for extra points</li>
+      </ul></div>
+      <div><span class="label">Changed</span><ul>
+        <li>A hedgehog family in the English countryside instead of a frog</li>
+        <li>Tractors, vans and motorbikes on a country lane; narrowboats, ducks and lily pads on a canal</li>
+        <li>A towpath before the homes, so the last hop is about timing, not luck</li>
+        <li>Hitting a hedge or a full home bumps you back instead of killing you</li>
+      </ul></div>
+      <div><span class="label">New</span><ul>
+        <li>The return trip: every night is out and back, dusk to dawn</li>
+        <li>A farmer who appears without warning and chases you, and can be lured into the traffic</li>
+        <li>The hop combo, and seeded lanes you can learn</li>
+        <li>A heron that stabs at lily pads, a fox on the middle verge</li>
+        <li>Headlights, fireflies and dawn light; controller and touch from day one</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Sprites: <a href="https://huggingface.co/spaces/cfahlgren1/pixel-search" target="_blank" rel="noopener">Pixel Search</a> catalog of <a href="https://huggingface.co/datasets/Angais/pixel-art-atlas-1.4m" target="_blank" rel="noopener">Angais/pixel-art-atlas-1.4m</a>, CC0, AI-generated. Numbers under each sprite are its catalog id.</span>
+    <span>Fonts: Lilita One, Atkinson Hyperlegible and Silkscreen (SIL OFL).</span>
+  </footer>
+</div>
+
+<script>
+const SPRITES = /*SPRITES*/{};
+
+const HOG = { slot: "player", name: "Hoglet", text: "Five of them per leg, one crossing at a time. Pick the one that reads best at 1×, the size it plays at." };
+const ROAD = [
+  { slot: "tractor", name: "Tractor", text: "The slowest lane, next to the verge. Tows a hay trailer, so it fills two and a half tiles." },
+  { slot: "car", name: "Car", text: "Medium speed, often two close together." },
+  { slot: "motorbike", name: "Motorbike", text: "The middle lane and by far the fastest. It comes alone, with long gaps between." },
+  { slot: "van", name: "Delivery van", text: "Medium speed, in steady traffic." },
+  { slot: "lorry", name: "Lorry", text: "The lane by the middle verge. Slow, heavy and close together." },
+];
+const CANAL = [
+  { slot: "duck", name: "Duck family", text: "A mother and two ducklings you can ride. Some families dabble: they bob and ripple for a moment, then upend and leave you in the water." },
+  { slot: "lily", name: "Lily pads", text: "Small clusters drifting slowly. The heron hunts on this lane." },
+  { slot: "heron", name: "Heron", text: "Stalks along the towpath and is deadly to touch. Every few seconds it crouches, the pad below it glints, then it stabs down." },
+];
+const LAND = [
+  { slot: "fox", name: "Fox", text: "Prowls back and forth along the middle verge from night 2. Wait for it to pass." },
+  { slot: "farmer", name: "Farmer", pts: "300", text: "Turns up at random on the verges or the towpath from night 2. A torch beam sweeps in from the side first. Then he walks toward you, tile by tile, and follows you across the road. If a vehicle comes through his lane he dives back to the verge and gives up, for 300." },
+];
+const BONUS = [
+  { slot: "mouse", name: "Field mouse", pts: "200", text: "Hitches a ride on a log or narrowboat. Hop onto it and it climbs on your back. Get it home for 200." },
+  { slot: "beetle", name: "Beetle", pts: "200", text: "Shows up in an empty home for a few seconds. Get there first." },
+];
+
+// Picks: the first candidate by default, remembered per viewer when storage allows.
+const picks = {};
+for (const slot in SPRITES) picks[slot] = SPRITES[slot][0]?.id;
+const mirror = { player: true, mouse: true, car: true, van: true, tractor: true, motorbike: true, duck: true, heron: true, fox: true, beetle: true };
+try {
+  const saved = JSON.parse(localStorage.getItem("hedge-hogger-picks") || "{}");
+  for (const slot in saved) if (SPRITES[slot]?.some((s) => s.id === saved[slot])) picks[slot] = saved[slot];
+  const savedMirror = JSON.parse(localStorage.getItem("hedge-hogger-mirror") || "null");
+  if (savedMirror) { for (const k in mirror) delete mirror[k]; for (const slot of savedMirror) if (SPRITES[slot]) mirror[slot] = true; }
+} catch (e) {}
+function save() {
+  try {
+    localStorage.setItem("hedge-hogger-picks", JSON.stringify(picks));
+    localStorage.setItem("hedge-hogger-mirror", JSON.stringify(Object.keys(mirror)));
+  } catch (e) {}
+}
+
+const images = {};
+for (const slot in SPRITES) for (const s of SPRITES[slot]) { const img = new Image(); img.src = s.src; images[s.id] = img; }
+const pick = (slot) => images[picks[slot]];
+const entry = (slot) => SPRITES[slot].find((s) => s.id === picks[slot]);
+
+function candidates(slot) {
+  const box = document.createElement("div");
+  box.className = "cands";
+  for (const s of SPRITES[slot]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "cand"; b.dataset.slot = slot; b.dataset.id = s.id;
+    b.title = `${s.subject} · #${s.id}`;
+    b.setAttribute("aria-label", `${s.subject}, catalog ${s.id}`);
+    b.setAttribute("aria-pressed", String(s.id === picks[slot]));
+    const img = document.createElement("img"); img.src = s.src; img.alt = "";
+    b.append(img); box.append(b);
+  }
+  return box;
+}
+
+function card({ slot, name, pts, text }) {
+  const c = document.createElement("article");
+  c.className = "card"; c.dataset.slot = slot;
+  const head = document.createElement("div"); head.className = "card-head";
+  const hero = document.createElement("img"); hero.className = "hero-sprite"; hero.alt = name; hero.dataset.hero = slot;
+  const title = document.createElement("div"); title.className = "card-title";
+  const h = document.createElement("h3"); h.textContent = name; title.append(h);
+  if (pts) { const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = `${pts} pts`; title.append(chip); }
+  const meta = document.createElement("span"); meta.className = "meta"; meta.dataset.meta = slot; title.append(meta);
+  head.append(hero, title); c.append(head);
+  if (text) { const p = document.createElement("p"); p.textContent = text; c.append(p); }
+  const tools = document.createElement("div"); tools.className = "card-tools";
+  const label = document.createElement("span"); label.className = "label"; label.textContent = "Candidates";
+  const m = document.createElement("button"); m.type = "button"; m.className = "mirror"; m.dataset.mirror = slot; m.textContent = "Mirror";
+  tools.append(label, m); c.append(tools);
+  c.append(candidates(slot));
+  return c;
+}
+
+function hogCard() {
+  const c = card(HOG);
+  const sizes = document.createElement("div"); sizes.className = "sizes";
+  for (const n of [1, 2, 4]) {
+    const f = document.createElement("figure");
+    const img = document.createElement("img"); img.width = 16 * n; img.height = 16 * n; img.alt = ""; img.dataset.hero = "player";
+    const cap = document.createElement("figcaption"); cap.textContent = `${n}× · ${16 * n}px`;
+    f.append(img, cap); sizes.append(f);
+  }
+  c.insertBefore(sizes, c.querySelector(".card-tools"));
+  return c;
+}
+
+document.getElementById("hog-grid").append(hogCard());
+for (const e of ROAD) document.getElementById("road-grid").append(card(e));
+for (const e of CANAL) document.getElementById("canal-grid").append(card(e));
+for (const e of LAND) document.getElementById("land-grid").append(card(e));
+for (const e of BONUS) document.getElementById("bonus-grid").append(card(e));
+
+function refreshCards() {
+  document.querySelectorAll("[data-hero]").forEach((img) => { img.src = entry(img.dataset.hero).src; img.classList.toggle("flip", Boolean(mirror[img.dataset.hero])); });
+  document.querySelectorAll("[data-meta]").forEach((m) => { const s = entry(m.dataset.meta); m.textContent = `${s.subject} · #${s.id}`; });
+  document.querySelectorAll(".cand").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.id) === picks[b.dataset.slot])));
+  document.querySelectorAll("[data-mirror]").forEach((b) => b.setAttribute("aria-pressed", String(Boolean(mirror[b.dataset.mirror]))));
+}
+refreshCards();
+
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest(".cand");
+  const m = ev.target.closest("[data-mirror]");
+  if (b) picks[b.dataset.slot] = Number(b.dataset.id);
+  else if (m) { const s = m.dataset.mirror; if (mirror[s]) delete mirror[s]; else mirror[s] = true; }
+  else return;
+  save();
+  refreshCards();
+});
+
+document.getElementById("copy-picks").addEventListener("click", () => {
+  const json = JSON.stringify({ ...picks, mirror: Object.keys(mirror) }, null, 2);
+  const status = document.getElementById("copy-status");
+  const area = document.getElementById("picks-text");
+  const fallback = () => { area.value = json; area.hidden = false; area.focus(); area.select(); status.textContent = "Copy the selected text below."; };
+  try {
+    navigator.clipboard.writeText(json).then(() => { area.hidden = true; status.textContent = "Copied. Paste it back to Claude."; }, fallback);
+  } catch (e) { fallback(); }
+});
+
+// ---- Screen mockup ----
+const cv = document.getElementById("screen");
+const ctx = cv.getContext("2d");
+const W = 416, H = 248, HUD = 24, T = 16;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const C = { night: "#070906", ink: "#f1ead6", dim: "#a8af99", amber: "#ffb648", canal: "#6cc3c8", sign: "#e0453a", line: "#2f3b2c" };
+const rowTop = (r) => HUD + r * T;
+const rowMid = (r) => HUD + r * T + 8;
+// Rows: 0 orchard hedge (nests), 1 towpath, 2-5 canal, 6 middle verge, 7-11 road, 12 verge, 13 garden hedge (burrows).
+const HOMES = [72, 140, 208, 276, 344];
+const isWater = (r) => r >= 2 && r <= 5;
+const isRoad = (r) => r >= 7 && r <= 11;
+const HOP_T = 0.11, COMBO_WINDOW = 0.5, TIME = 30;
+const DUCK = { cycle: 6.5, warn: 4.3, under: 5.2, up: 6.4 };
+const PAL = {
+  out: { grass: "#4e6a33", grass2: "#587538", tuft: "#7d9c47", flower: "#e9d27a", hedge: "#24391f", hedge2: "#335229", berry: "#b8433d", path: "#76634a", path2: "#857157", road: "#38383e", road2: "#414148", dash: "#d9d2b8", kerb: "#8a8778", water: "#2c6874", water2: "#357c89", ripple: "#8fd0d2", coping: "#968b76", hole: "#140f0b", tint: "rgba(255,140,70,0.10)", lights: 0.28, flies: 0 },
+  back: { grass: "#2a3c29", grass2: "#304530", tuft: "#466a3e", flower: "#b9b28a", hedge: "#16251a", hedge2: "#203722", berry: "#7a3434", path: "#4d4538", path2: "#575042", road: "#25262c", road2: "#2c2d34", dash: "#a9a690", kerb: "#5e5d55", water: "#1b4553", water2: "#225463", ripple: "#6fb2c4", coping: "#6a665a", hole: "#0a0806", tint: "rgba(20,30,80,0.22)", lights: 0.5, flies: 1 },
+};
+const BOAT_PAINT = [["#2f6b3a", "#b8433d"], ["#7a2a2a", "#e9c46a"], ["#24476b", "#e07a3a"], ["#4a2f5e", "#6cc3c8"]];
+let leg = "out", night = 2, showTouch = false;
+
+function mulberry32(a) { return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const hash = (a, b) => (((a * 73856093) ^ (b * 19349663)) >>> 0);
+
+// Lanes. Speeds are design pixels per second; dir +1 moves right.
+const LANES = [
+  { row: 2, kind: "lily", dir: -1, speed: 16 },
+  { row: 3, kind: "boat", dir: 1, speed: 13 },
+  { row: 4, kind: "ducks", dir: -1, speed: 22 },
+  { row: 5, kind: "log", dir: 1, speed: 26 },
+  { row: 7, kind: "lorry", dir: -1, speed: 28 },
+  { row: 8, kind: "van", dir: 1, speed: 40 },
+  { row: 9, kind: "motorbike", dir: -1, speed: 74 },
+  { row: 10, kind: "car", dir: 1, speed: 48 },
+  { row: 11, kind: "tractor", dir: -1, speed: 18 },
+];
+const laneOf = {}; for (const L of LANES) laneOf[L.row] = L;
+const SPAN = W + 128;
+const LEN = { car: [16], van: [16], lorry: [16], motorbike: [16], tractor: [36], log: [48, 64, 80], boat: [80, 96], ducks: [48], lily: [32, 48] };
+const GAP = { car: [40, 96], van: [56, 110], lorry: [44, 90], motorbike: [130, 190], tractor: [80, 140], log: [36, 64], boat: [44, 72], ducks: [32, 56], lily: [24, 44] };
+
+function layout() {
+  const R = mulberry32(night * 101 + (leg === "out" ? 0 : 1));
+  const ramp = 1 + 0.08 * ((night - 1) * 2 + (leg === "out" ? 0 : 1));
+  for (const L of LANES) {
+    L.v = L.speed * ramp * (0.9 + R() * 0.2);
+    L.items = [];
+    let x = -64 + Math.floor(R() * 40);
+    for (;;) {
+      const lens = LEN[L.kind], len = lens[Math.floor(R() * lens.length)];
+      if (x + len > W + 64) break;
+      const it = { x, len };
+      if (L.kind === "ducks") { it.dives = R() < 0.55; it.ph = R() * DUCK.cycle; }
+      if (L.kind === "boat") it.paint = BOAT_PAINT[Math.floor(R() * BOAT_PAINT.length)];
+      L.items.push(it);
+      const [g0, g1] = GAP[L.kind];
+      x += len + Math.round(g0 + R() * (g1 - g0));
+    }
+    if (L.kind === "ducks" && !L.items.some((i) => i.dives)) L.items[0].dives = true;
+  }
+}
+
+// Where an item will be after dt seconds, wrapped into [-64, W + 64).
+function itemX(L, it, dt = 0) {
+  let x = it.x + L.dir * L.v * dt;
+  while (x > W + 64) x -= SPAN;
+  while (x + it.len < -64) x += SPAN;
+  return x;
+}
+function duckState(it, t) {
+  if (!it.dives) return "up";
+  const p = (t + it.ph) % DUCK.cycle;
+  return p < DUCK.warn ? "up" : p < DUCK.under ? "warn" : p < DUCK.up ? "under" : "up";
+}
+function platformAt(r, x, dt = 0) {
+  const L = laneOf[r];
+  for (const it of L.items) {
+    const ix = itemX(L, it, dt);
+    if (x >= ix + 1 && x <= ix + it.len - 1) {
+      if (L.kind === "ducks" && duckState(it, clock + dt) === "under") return null;
+      return it;
+    }
+  }
+  return null;
+}
+function vehicleAt(r, x, dt = 0, pad = 3) {
+  const L = laneOf[r];
+  for (const it of L.items) { const ix = itemX(L, it, dt); if (x > ix - pad && x < ix + it.len + pad) return it; }
+  return null;
+}
+
+// World state
+let clock = 0, score = 12450, hi = 50000, lives = 3, nextLife = 30000, shake = 0, banner = null;
+let parts = [], pops = [], rings = [];
+let burrows, nests, hog, fox, heron, farmer, farmerClock, mouse, beetle, beetleClock, legDone = 0;
+const startRow = () => (leg === "out" ? 13 : 0);
+const goalRow = () => (leg === "out" ? 0 : 13);
+const fwd = () => (leg === "out" ? -1 : 1);
+const starts = () => (leg === "out" ? burrows : nests);
+const goals = () => (leg === "out" ? nests : burrows);
+
+function newLeg() {
+  layout();
+  if (leg === "out") { burrows = [1, 1, 1, 1, 1]; nests = [0, 0, 0, 0, 0]; }
+  else { burrows = [0, 0, 0, 0, 0]; nests = [1, 1, 1, 1, 1]; }
+  fox = { x: 120, dir: 1 };
+  heron = { x: 300, dir: -1, st: "walk", t: 1.5 };
+  farmer = null; farmerClock = 7;
+  mouse = { lane: 5, off: 20, item: laneOf[5].items[1] || laneOf[5].items[0], carried: false, wait: 0 };
+  beetle = null; beetleClock = 4;
+  legDone = 0;
+  nextHoglet();
+}
+function nextHoglet() {
+  const s = starts();
+  const i = s.findIndex((v) => v);
+  if (i < 0) return;
+  s[i] = 0;
+  hog = { x: HOMES[i], r: startRow(), home: i, hopping: false, u: 0, fx: 0, fr: 0, tx: 0, tr: 0, face: 1, dead: 0, cause: "", blink: 0.8, time: TIME, combo: 0, lastLand: -9, best: 0, bump: 0 };
+}
+
+function burst(x, y, colors, n = 14, power = 60, g = 120) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = power * (0.3 + Math.random());
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, life: 0.35 + Math.random() * 0.45, c: colors[i % colors.length], g });
+  }
+}
+function pop(x, y, s) { pops.push({ x, y, t: 0, s }); }
+function addScore(n) {
+  score += n;
+  if (score >= nextLife) { lives += 1; nextLife += 20000; pop(W / 2, 100, "EXTRA LIFE"); }
+  hi = Math.max(hi, score);
+}
+
+function die(cause) {
+  if (hog.dead || hog.blink > 0) return;
+  hog.dead = 1.3; hog.cause = cause; hog.hopping = false;
+  const y = rowMid(hog.r);
+  if (cause === "SPLASH!" || cause === "SWEPT AWAY!") { rings.push({ x: hog.x, y, t: 0, c: PAL[leg].ripple }); burst(hog.x, y, [PAL[leg].ripple, "#ffffff", PAL[leg].water2], 16, 50, 160); }
+  else burst(hog.x, y, ["#8a5a3a", "#c89a6a", C.ink, "#5a3a24"], 24, 80);
+  shake = 0.3;
+  lives -= 1;
+  if (mouse.carried) { mouse.carried = false; mouse.wait = 2; mouse.item = null; }
+  banner = { t: 1.3, a: cause, b: lives >= 0 ? `${Math.max(0, lives)} ${lives === 1 ? "LIFE" : "LIVES"} LEFT` : "GAME OVER" };
+}
+
+function respawn() {
+  if (lives < 0) { lives = 3; score = 0; nextLife = 10000; }
+  const s = starts();
+  s[hog.home] = 1;
+  nextHoglet();
+  hog.blink = 1.2;
+}
+
+function reachHome(j) {
+  const g = goals();
+  g[j] = 1;
+  const m = Math.max(1, hog.combo);
+  let pts = 50 * m + 10 * Math.floor(hog.time / 0.5);
+  const extras = [];
+  if (beetle && beetle.home === j) { pts += 200; extras.push("BEETLE"); beetle = null; beetleClock = 9; }
+  if (mouse.carried) { pts += 200; extras.push("MOUSE"); mouse.carried = false; mouse.item = null; mouse.wait = 6; }
+  addScore(pts);
+  pop(HOMES[j], rowMid(goalRow()) + fwd() * -14, `+${pts}`);
+  burst(HOMES[j], rowMid(goalRow()), [C.amber, "#fff3c4", PAL[leg].flower], 14, 45, 40);
+  rings.push({ x: HOMES[j], y: rowMid(goalRow()), t: 0, c: C.amber });
+  if (g.every((v) => v)) {
+    addScore(1000);
+    banner = { t: 2.4, a: leg === "out" ? "ALL FIVE IN THE ORCHARD" : "ALL FIVE HOME", b: `+1,000  ·  ${leg === "out" ? "NOW BRING THEM BACK" : "NIGHT " + (night + 1) + " NEXT"}` };
+    legDone = 2.4; hog = null;
+  } else if (extras.length) {
+    banner = { t: 1.2, a: `HOME  ·  ${extras.join(" + ")}`, b: `+${pts}` };
+    nextHoglet();
+  } else nextHoglet();
+}
+
+// Hop rules. Returns false when the hop is blocked.
+function tryHop(dx, dr) {
+  if (!hog || hog.dead || hog.hopping) return false;
+  let tx = hog.x + dx * T;
+  const tr = hog.r + dr;
+  if (dx) hog.face = dx;
+  if (tr < 0 || tr > 13) return false;
+  if (hog.r === startRow() && dr !== fwd()) return false;
+  if (tr === startRow()) { hog.bump = 0.12; return false; }
+  if (tr === goalRow()) {
+    const j = HOMES.findIndex((hx, k) => !goals()[k] && Math.abs(tx - hx) < 11);
+    if (j < 0) { hog.bump = 0.12; return false; }
+    tx = HOMES[j];
+  }
+  if (!isWater(tr) && (tx < 8 || tx > W - 8)) return false;
+  // Combo: forward hops chained within the window.
+  if (dr === fwd()) hog.combo = clock - hog.lastLand <= COMBO_WINDOW && hog.combo > 0 ? Math.min(4, hog.combo + 1) : 1;
+  else if (dr === -fwd()) hog.combo = 0;
+  Object.assign(hog, { hopping: true, u: 0, fx: hog.x, fr: hog.r, tx, tr });
+  parts.push({ x: hog.x, y: rowMid(hog.r) + 6, vx: -dx * 10, vy: -6, life: 0.25, c: isWater(hog.r) ? PAL[leg].ripple : "#9b8a6a", g: 0 });
+  return true;
+}
+
+function land() {
+  hog.hopping = false; hog.x = hog.tx; hog.r = hog.tr; hog.lastLand = clock;
+  const progress = (hog.r - startRow()) * fwd();
+  if (progress > hog.best) { hog.best = progress; addScore(10 * Math.max(1, hog.combo)); }
+  if (hog.r === goalRow()) { const j = HOMES.indexOf(hog.x); reachHome(j); return; }
+  if (isWater(hog.r)) {
+    const it = platformAt(hog.r, hog.x);
+    if (!it) { die("SPLASH!"); return; }
+    if (mouse.item === it && !mouse.carried && Math.abs(itemX(laneOf[mouse.lane], it) + mouse.off - hog.x) < 14) { mouse.carried = true; pop(hog.x, rowMid(hog.r) - 12, "HOP ON!"); }
+  }
+}
+
+function farmerPos() {
+  const u = Math.min(1, farmer.u);
+  return { x: farmer.fx + (farmer.tx - farmer.fx) * u, y: rowMid(farmer.fr) + (rowMid(farmer.tr) - rowMid(farmer.fr)) * u };
+}
+function hogPos() {
+  if (!hog) return { x: -99, y: -99 };
+  if (!hog.hopping) return { x: hog.x, y: rowMid(hog.r) };
+  return { x: hog.fx + (hog.tx - hog.fx) * hog.u, y: rowMid(hog.fr) + (rowMid(hog.tr) - rowMid(hog.fr)) * hog.u };
+}
+function spawnFarmer() {
+  const hr = hog ? hog.r : 12;
+  const row = hr <= 3 ? 1 : hr <= 8 ? 6 : 12;
+  const fromLeft = (hog ? hog.x : 0) > W / 2;
+  const x = fromLeft ? -8 : W + 8;
+  farmer = { st: "warn", t: 1.3, row, fromLeft, fx: x, fr: row, tx: x, tr: row, u: 1, face: fromLeft ? 1 : -1, home: row };
+}
+function farmerStep() {
+  const p = { x: farmer.tx, r: farmer.tr };
+  farmer.fx = p.x; farmer.fr = p.r; farmer.u = 0;
+  const zone = (r) => (farmer.home === 1 ? r === 1 : r >= 6 && r <= 12);
+  if (farmer.st === "leave" || farmer.st === "dive") {
+    const dir = farmer.fromLeft ? -1 : 1;
+    farmer.tx = p.x + dir * T; farmer.tr = p.r; farmer.face = dir;
+    return;
+  }
+  const h = hogPos(), hr = hog && !hog.dead ? (hog.hopping ? hog.tr : hog.r) : p.r;
+  if (zone(hr) && Math.abs(h.x - p.x) <= 8 && hr !== p.r) { farmer.tr = p.r + Math.sign(hr - p.r); farmer.tx = p.x; return; }
+  const dir = Math.sign(h.x - p.x) || farmer.face;
+  farmer.face = dir;
+  farmer.tx = p.x + dir * Math.min(T, Math.max(4, Math.abs(h.x - p.x))); farmer.tr = p.r;
+}
+
+function step(dt, input) {
+  clock += dt;
+  shake = Math.max(0, shake - dt);
+  for (const L of LANES) for (const it of L.items) it.x = itemX(L, it, dt);
+
+  // Fox on the middle verge, heron on the towpath.
+  fox.x += fox.dir * 26 * dt;
+  if (fox.x > W - 24) fox.dir = -1; else if (fox.x < 24) fox.dir = 1;
+  heron.t -= dt;
+  if (heron.st === "walk") {
+    heron.x += heron.dir * 9 * dt;
+    if (heron.x > W - 40) heron.dir = -1; else if (heron.x < 40) heron.dir = 1;
+    if (heron.t <= 0) { heron.st = "crouch"; heron.t = 0.75; }
+  } else if (heron.st === "crouch" && heron.t <= 0) { heron.st = "strike"; heron.t = 0.35; rings.push({ x: heron.x, y: rowMid(2), t: 0, c: PAL[leg].ripple }); }
+  else if (heron.st === "strike" && heron.t <= 0) { heron.st = "walk"; heron.t = 3.2; }
+
+  // Farmer
+  if (!farmer) { farmerClock -= dt; if (farmerClock <= 0 && hog && !hog.dead && night >= 2) spawnFarmer(); }
+  else {
+    farmer.t -= dt;
+    if (farmer.st === "warn" && farmer.t <= 0) { farmer.st = "chase"; farmer.t = 9; farmer.u = 1; }
+    if (farmer.st === "chase" && farmer.t <= 0) farmer.st = "leave";
+    if (farmer.st !== "warn") {
+      const rate = farmer.st === "chase" ? 1 / 0.42 : 1 / 0.22;
+      farmer.u += dt * rate;
+      if (farmer.u >= 1) farmerStep();
+      const f = farmerPos();
+      if ((farmer.st === "leave" || farmer.st === "dive") && (f.x < -12 || f.x > W + 12)) { farmer = null; farmerClock = 12 + Math.random() * 6; }
+      else {
+        const fr = Math.round((f.y - HUD - 8) / T);
+        if (farmer.st === "chase" && isRoad(fr) && vehicleAt(fr, f.x, 0, 2)) {
+          farmer.st = "dive"; farmer.fx = f.x; farmer.tx = f.x; farmer.fr = fr; farmer.tr = fr <= 9 ? 6 : 12; farmer.u = 0.2;
+          addScore(300); pop(f.x, f.y - 12, "HONK! +300"); burst(f.x, f.y, [C.amber, C.ink], 10, 50); shake = 0.15;
+        }
+        const h = hogPos();
+        if (farmer.st === "chase" && hog && !hog.dead && Math.abs(f.x - h.x) < 10 && Math.abs(f.y - h.y) < 8) die("BAGGED!");
+      }
+    }
+  }
+
+  // Bonuses
+  if (!beetle) { beetleClock -= dt; if (beetleClock <= 0) { const free = HOMES.map((_, k) => k).filter((k) => !goals()[k]); if (free.length) beetle = { home: free[Math.floor(Math.random() * free.length)], t: 6 }; beetleClock = 10; } }
+  else { beetle.t -= dt; if (beetle.t <= 0 || goals()[beetle.home]) beetle = null; }
+  if (!mouse.carried && !mouse.item) { mouse.wait -= dt; if (mouse.wait <= 0) { mouse.lane = Math.random() < 0.5 ? 5 : 3; const its = laneOf[mouse.lane].items; mouse.item = its[Math.floor(Math.random() * its.length)]; mouse.off = Math.min(mouse.item.len - 10, 12 + Math.floor(Math.random() * 3) * 16); } }
+
+  if (legDone > 0) {
+    legDone -= dt;
+    if (legDone <= 0) { if (leg === "back") night += 1; setLeg(leg === "out" ? "back" : "out"); }
+  }
+
+  // Hoglet
+  if (hog) {
+    if (hog.blink > 0) hog.blink -= dt;
+    if (hog.bump > 0) hog.bump -= dt;
+    if (hog.dead) { hog.dead -= dt; if (hog.dead <= 0) respawn(); }
+    else {
+      hog.time -= dt;
+      if (hog.time <= 0) die("TOO SLOW!");
+      if (input && !hog.hopping) tryHop(input.dx, input.dr);
+      if (hog.hopping) {
+        hog.u += dt / HOP_T;
+        if (hog.u >= 1) land();
+        else if (hog.u > 0.5 && isRoad(hog.tr) && vehicleAt(hog.tr, hog.fx + (hog.tx - hog.fx) * hog.u)) die("BUMPED!");
+      } else if (isWater(hog.r)) {
+        const it = platformAt(hog.r, hog.x);
+        if (!it) die("SPLASH!");
+        else { hog.x += laneOf[hog.r].dir * laneOf[hog.r].v * dt; if (hog.x < 4 || hog.x > W - 4) die("SWEPT AWAY!"); }
+      } else if (isRoad(hog.r) && vehicleAt(hog.r, hog.x)) die("BUMPED!");
+      if (hog && !hog.dead && !hog.hopping) {
+        if (hog.r === 6 && Math.abs(hog.x - fox.x) < 10 && night >= 2) die("CAUGHT BY THE FOX!");
+        if (hog.r === 1 && Math.abs(hog.x - heron.x) < 9) die("PECKED!");
+        if (hog.r === 2 && heron.st === "strike" && Math.abs(hog.x - heron.x) < 10) die("PECKED!");
+      }
+    }
+  }
+
+  for (const p of parts) { p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }
+  parts = parts.filter((p) => p.life > 0);
+  for (const p of pops) p.t += dt;
+  pops = pops.filter((p) => p.t < 0.9);
+  for (const r of rings) r.t += dt;
+  rings = rings.filter((r) => r.t < 0.6);
+  if (banner) { banner.t -= dt; if (banner.t <= 0) banner = null; }
+}
+
+// ---- Autopilot for the demo: look ahead along the lanes and take the first safe hop. ----
+function safeAt(x, r, t0, t1) {
+  if (r < 0 || r > 13) return false;
+  if (r === goalRow()) return HOMES.some((hx, k) => !goals()[k] && Math.abs(x - hx) < 11);
+  if (r === startRow()) return false;
+  if (farmer && farmer.st !== "warn" && farmer.st !== "dive") { const f = farmerPos(); if (Math.abs(f.y - rowMid(r)) < 10 && Math.abs(f.x - x) < 28) return false; }
+  if (isWater(r)) {
+    const L = laneOf[r];
+    const it = platformAt(r, x, t0);
+    if (!it) return false;
+    const off = x - itemX(L, it, t0);
+    if (off < 3 || off > it.len - 3) return false;
+    for (let t = t0; t <= t1; t += 0.1) {
+      if (L.kind === "ducks" && duckState(it, clock + t) !== "up") return false;
+      const cx = itemX(L, it, t) + off;
+      if (cx < 12 || cx > W - 12) return false;
+    }
+    if (r === 2 && heron.st !== "walk" && Math.abs(x - heron.x) < 16) return false;
+    return true;
+  }
+  if (isRoad(r)) { for (let t = t0; t <= t1; t += 0.05) if (vehicleAt(r, x, t, 8)) return false; return true; }
+  if (r === 6 && night >= 2 && Math.abs(x - (fox.x + fox.dir * 26 * t0)) < 22) return false;
+  if (r === 1 && Math.abs(x - heron.x) < 16) return false;
+  return x >= 8 && x <= W - 8;
+}
+let apCool = 0;
+function autopilot(dt) {
+  apCool -= dt;
+  if (!hog || hog.dead || hog.hopping || apCool > 0) return null;
+  const f = fwd(), x = hog.x, r = hog.r;
+  const stay = safeAt(x, r, 0, 0.45);
+  const go = (dx, dr) => { apCool = 0.06; return { dx, dr }; };
+  if (r + f === goalRow()) {
+    const j = HOMES.map((hx, k) => [hx, k]).filter(([, k]) => !goals()[k]).sort((a, b) => Math.abs(a[0] - x) - Math.abs(b[0] - x))[0];
+    if (!j) return null;
+    if (Math.abs(j[0] - x) < 9 && safeAt(j[0], r + f, HOP_T, HOP_T)) return go(0, f);
+    const dx = Math.sign(j[0] - x);
+    if (safeAt(x + dx * T, r, HOP_T, HOP_T + 0.4)) return go(dx, 0);
+    return stay ? null : go(-dx, 0);
+  }
+  if (safeAt(x, r + f, HOP_T, HOP_T + 0.35)) return go(0, f);
+  const drift = isWater(r) ? laneOf[r].dir : 0;
+  if (stay && !(drift && (x < 60 || x > W - 60))) return null;
+  for (const [dx, dr] of [[-drift || 1, 0], [drift || -1, 0], [0, -f]]) if (safeAt(x + dx * T, r + dr, HOP_T, HOP_T + 0.35)) return go(dx, dr);
+  return null;
+}
+
+// ---- Drawing ----
+let bgCanvas = null, bgLeg = "";
+function bakeBackground() {
+  const P = PAL[leg];
+  bgCanvas = document.createElement("canvas"); bgCanvas.width = W; bgCanvas.height = H;
+  const g = bgCanvas.getContext("2d");
+  const fill = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  for (const r of [0, 13]) {
+    const y = rowTop(r);
+    fill(P.hedge, 0, y, W, T);
+    for (let x = 0; x < W; x += 3) for (let k = 0; k < 3; k++) { const h = hash(x, r * 7 + k); if (h % 3 === 0) fill(P.hedge2, x, y + (h % 13), 3, 3); }
+    for (let i = 0; i < 40; i++) { const h = hash(i, r + 31); fill(P.berry, h % W, y + 2 + (h >> 5) % 12, 1, 1); }
+    for (const hx of HOMES) { fill(P.hole, hx - 10, y + 2, 20, 13); fill(P.hole, hx - 8, y + 1, 16, 1); fill(P.path, hx - 10, r === 0 ? y + 15 : y + 2, 20, 1); }
+  }
+  for (const r of [6, 12]) {
+    const y = rowTop(r);
+    fill(P.grass, 0, y, W, T);
+    for (let i = 0; i < 160; i++) { const h = hash(i, r * 13); fill(h % 5 ? P.tuft : P.grass2, h % W, y + 1 + (h >> 7) % 14, h % 4 ? 1 : 2, 1); }
+    for (let i = 0; i < 9; i++) { const h = hash(i, r * 17 + 3); fill(P.flower, h % W, y + 3 + (h >> 6) % 10, 1, 1); }
+  }
+  const ty = rowTop(1);
+  fill(P.path, 0, ty, W, T);
+  for (let i = 0; i < 220; i++) { const h = hash(i, 91); fill(P.path2, h % W, ty + (h >> 8) % 16, 1, 1); }
+  fill(P.grass, 0, ty, W, 2);
+  for (let r = 7; r <= 11; r++) {
+    const y = rowTop(r);
+    fill(P.road, 0, y, W, T);
+    for (let i = 0; i < 90; i++) { const h = hash(i, r * 29); fill(P.road2, h % W, y + (h >> 9) % 16, 1, 1); }
+    if (r > 7) for (let x = 4; x < W; x += 24) fill(P.dash, x, y, 10, 1);
+  }
+  fill(P.kerb, 0, rowTop(7), W, 1); fill(P.kerb, 0, rowTop(12) - 1, W, 1);
+  fill(P.coping, 0, rowTop(2), W, 2); fill(P.coping, 0, rowTop(6) - 2, W, 2);
+  bgLeg = leg;
+}
+
+function drawSprite(slot, x, y, faceRight = true) {
+  const img = pick(slot);
+  if (!img || !img.complete) return;
+  const flip = Boolean(mirror[slot]) !== !faceRight;
+  ctx.save(); ctx.translate(Math.round(x), Math.round(y));
+  if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(img, -8, -8, 16, 16);
+  ctx.restore();
+}
+function text(str, x, y, color = C.ink, align = "left") {
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "top"; ctx.font = "8px Silkscreen, monospace";
+  ctx.fillText(str, x, y);
+}
+const rect = (c, x, y, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
+
+function drawWater() {
+  const P = PAL[leg];
+  rect(P.water, 0, rowTop(2) + 2, W, 4 * T - 4);
+  for (let r = 2; r <= 5; r++) {
+    const L = laneOf[r], y = rowTop(r);
+    for (let i = 0; i < 14; i++) {
+      const h = hash(i, r * 41), x = ((h % SPAN) + L.dir * clock * L.v * 0.6) % SPAN;
+      rect(P.water2, ((x % W) + W) % W, y + 3 + (h >> 6) % 11, 6 + (h % 7), 1);
+    }
+  }
+}
+function drawLog(x, y, len) {
+  rect("#6b4a2e", x, y + 3, len, 10); rect("#8a6440", x, y + 3, len, 2); rect("#4e3420", x, y + 11, len, 2);
+  for (let k = 6; k < len - 4; k += 11) rect("#4e3420", x + k, y + 6, 4, 1);
+  rect("#b08a5a", x, y + 4, 3, 8); rect("#7a5a38", x + 1, y + 6, 1, 4); rect("#b08a5a", x + len - 3, y + 4, 3, 8);
+}
+function drawBoat(x, y, len, dir, paint) {
+  const [body, trim] = paint;
+  rect(body, x + 3, y + 3, len - 6, 11); rect(trim, x + 3, y + 12, len - 6, 1);
+  const bow = dir > 0 ? x + len - 4 : x;
+  rect(body, bow, y + 5, 4, 7); rect("#1a1410", x + 3, y + 13, len - 6, 1);
+  rect("#e8dcc0", x + 12, y + 2, len - 26, 4); rect("#c9b994", x + 12, y + 5, len - 26, 1);
+  for (let k = 18; k < len - 18; k += 12) { rect("#f4d27a", x + k, y + 8, 3, 2); }
+  rect("#3a2a20", dir > 0 ? x + 6 : x + len - 9, y + 4, 3, 4);
+}
+function drawHeadlights(L, ix, it, y) {
+  const P = PAL[leg];
+  const nose = L.dir > 0 ? ix + it.len : ix;
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  const grad = ctx.createLinearGradient(nose, 0, nose + L.dir * 34, 0);
+  grad.addColorStop(0, `rgba(255,200,100,${P.lights * 0.7})`); grad.addColorStop(1, "rgba(255,200,100,0)");
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.moveTo(nose, y + 6); ctx.lineTo(nose + L.dir * 34, y + 1); ctx.lineTo(nose + L.dir * 34, y + 15); ctx.lineTo(nose, y + 10); ctx.fill();
+  ctx.restore();
+}
+function drawLanes() {
+  const P = PAL[leg];
+  for (const L of LANES) {
+    const y = rowTop(L.row), right = L.dir > 0;
+    for (const it of L.items) {
+      const x = it.x;
+      if (x > W + 8 || x + it.len < -8) continue;
+      if (L.kind === "log") drawLog(x, y, it.len);
+      else if (L.kind === "boat") drawBoat(x, y, it.len, L.dir, it.paint);
+      else if (L.kind === "lily") for (let k = 0; k < it.len; k += 16) drawSprite("lily", x + k + 8, y + 8);
+      else if (L.kind === "ducks") {
+        const st = duckState(it, clock);
+        for (let k = 0; k < 3; k++) {
+          const dx = right ? x + it.len - 8 - k * 16 : x + 8 + k * 16;
+          if (st === "under") { rect(P.ripple, dx - 5, y + 9, 10, 1); rect(P.ripple, dx - 3, y + 7, 2, 1); continue; }
+          const bob = st === "warn" ? Math.round(Math.sin(clock * 22 + k) * 1.2) : 0;
+          if (st === "warn") { rect(P.ripple, dx - 7, y + 13, 14, 1); }
+          drawSprite("duck", dx, y + 8 + bob, right);
+        }
+      } else {
+        if (P.lights) drawHeadlights(L, x, it, y);
+        const front = right ? x + it.len - 8 : x + 8;
+        if (L.kind === "tractor") {
+          const tx = right ? x : x + 16;
+          rect("#7a5a2a", tx, y + 5, 20, 8); rect("#d8b860", tx + 1, y + 3, 8, 6); rect("#c9a850", tx + 10, y + 3, 8, 6); rect("#2a2420", tx + 3, y + 13, 3, 2); rect("#2a2420", tx + 14, y + 13, 3, 2);
+        }
+        drawSprite(L.kind, front, y + 8, right);
+      }
+    }
+  }
+  // Mouse riding a platform
+  if (mouse.item && !mouse.carried) {
+    const L = laneOf[mouse.lane], ix = itemX(L, mouse.item);
+    drawSprite("mouse", ix + mouse.off, rowTop(mouse.lane) + 5 + (Math.sin(clock * 5) > 0.8 ? -1 : 0), L.dir > 0);
+  }
+}
+function drawHomes() {
+  const P = PAL[leg];
+  for (let k = 0; k < 5; k++) {
+    if (nests[k]) drawSprite("player", HOMES[k], rowMid(0) + 1, k % 2 === 0);
+    if (burrows[k]) drawSprite("player", HOMES[k], rowMid(13), k % 2 === 1);
+  }
+  if (beetle) { const y = rowMid(goalRow()); drawSprite("beetle", HOMES[beetle.home], y + (Math.sin(clock * 8) > 0 ? 0 : -1)); if (beetle.t < 1.5 && Math.sin(clock * 20) > 0) rect(C.amber, HOMES[beetle.home] - 1, y - 10, 2, 2); }
+  // A soft glow marks empty goal homes.
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let k = 0; k < 5; k++) if (!goals()[k]) { ctx.fillStyle = `rgba(255,182,72,${0.08 + 0.05 * Math.sin(clock * 3 + k)})`; ctx.fillRect(HOMES[k] - 10, rowTop(goalRow()) + 2, 20, 13); }
+  ctx.restore();
+}
+function drawCritters() {
+  if (night >= 2) drawSprite("fox", fox.x, rowMid(6), fox.dir > 0);
+  const hy = rowMid(1) + (heron.st === "crouch" ? 2 : 0);
+  if (heron.st === "crouch") {
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.strokeStyle = `rgba(255,255,255,${0.35 + 0.3 * Math.sin(clock * 30)})`; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(heron.x, rowMid(2), 9, 5, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+  }
+  drawSprite("heron", heron.x, hy - 4, heron.dir > 0);
+  if (heron.st === "strike") { rect("#c9c3b0", heron.x - 1 + heron.dir * 3, rowTop(2) - 2, 2, 10); }
+  if (farmer) {
+    const f = farmer.st === "warn" ? { x: farmer.fromLeft ? -8 : W + 8, y: rowMid(farmer.row) } : farmerPos();
+    const beamFrom = farmer.st === "warn" ? (farmer.fromLeft ? 0 : W) : f.x + farmer.face * 5;
+    const reach = farmer.st === "warn" ? 70 * Math.min(1, (1.3 - farmer.t) / 0.6) + 10 : 52;
+    if (farmer.st !== "dive") {
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      const grad = ctx.createLinearGradient(beamFrom, 0, beamFrom + farmer.face * reach, 0);
+      grad.addColorStop(0, "rgba(255,236,170,0.45)"); grad.addColorStop(1, "rgba(255,236,170,0)");
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.moveTo(beamFrom, f.y - 1); ctx.lineTo(beamFrom + farmer.face * reach, f.y - 9); ctx.lineTo(beamFrom + farmer.face * reach, f.y + 9); ctx.lineTo(beamFrom, f.y + 2); ctx.fill();
+      ctx.restore();
+    }
+    if (farmer.st === "warn") { const bx = farmer.fromLeft ? 8 : W - 8; if (Math.sin(clock * 16) > -0.3) { rect(C.sign, bx - 4, f.y - 13, 8, 10); text("!", bx, f.y - 12, C.ink, "center"); } }
+    else drawSprite("farmer", f.x, f.y - 2 + (farmer.u < 0.5 ? -1 : 0), farmer.face > 0);
+  }
+}
+function drawHog() {
+  if (!hog) return;
+  const p = hogPos();
+  if (hog.dead) {
+    const wet = hog.cause === "SPLASH!" || hog.cause === "SWEPT AWAY!";
+    if (!wet || hog.dead > 1.0) {
+      const sz = 5;
+      rect("#5a3a24", p.x - sz, p.y - sz + 2, sz * 2, sz * 2 - 2); rect("#8a5a3a", p.x - sz + 1, p.y - sz + 1, sz * 2 - 2, 2);
+      for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4 + clock * 3; rect("#3a2414", p.x + Math.cos(a) * 6, p.y + 1 + Math.sin(a) * 6, 1, 1); }
+    }
+    return;
+  }
+  if (hog.blink > 0 && Math.sin(clock * 30) < 0) return;
+  const lift = hog.hopping ? Math.sin(Math.PI * hog.u) * 4 : 0;
+  ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(Math.round(p.x) - 5, Math.round(p.y) + 5, 10, 2);
+  const bx = hog.bump > 0 ? Math.round(Math.sin(hog.bump * 80)) : 0;
+  drawSprite("player", p.x + bx, p.y - lift, hog.face > 0);
+  if (mouse.carried) drawSprite("mouse", p.x - hog.face * 2, p.y - lift - 7, hog.face > 0);
+}
+function drawFireflies() {
+  if (!PAL[leg].flies) return;
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 14; i++) {
+    const h = hash(i, 77), row = [1, 6, 12][i % 3];
+    const x = ((h % W) + Math.sin(clock * 0.7 + i) * 20 + W) % W, y = rowTop(row) + 3 + (h >> 5) % 10 + Math.sin(clock * 1.3 + i * 2) * 3;
+    const a = 0.4 + 0.4 * Math.sin(clock * 3 + i * 1.7);
+    ctx.fillStyle = `rgba(230,255,140,${a})`; ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    ctx.fillStyle = `rgba(230,255,140,${a * 0.25})`; ctx.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 3);
+  }
+  ctx.restore();
+}
+
+function drawHud(demo) {
+  rect(C.night, 0, 0, W, HUD); rect(C.line, 0, HUD - 1, W, 1);
+  text("SCORE", 4, 3, C.dim); text(String(score).padStart(6, "0").replace(/(\d{3})$/, ",$1"), 40, 3, C.amber);
+  if (hog && hog.combo > 1) { rect(C.amber, 92, 2, 18, 9); text(`x${hog.combo}`, 101, 3, C.night, "center"); }
+  text("HI", 122, 3, C.dim); text(String(hi).padStart(6, "0").replace(/(\d{3})$/, ",$1"), 138, 3, C.ink);
+  text("LIVES", 196, 3, C.dim);
+  for (let i = 0; i < Math.min(6, Math.max(0, lives)); i++) { const x = 232 + i * 10; rect("#6b4a30", x + 1, 4, 5, 1); rect("#6b4a30", x, 5, 7, 3); rect("#e3c9a0", x + 6, 6, 2, 2); rect(C.night, x + 6, 6, 1, 1); rect("#e3c9a0", x + 1, 8, 1, 1); rect("#e3c9a0", x + 5, 8, 1, 1); }
+  text(`NIGHT ${night}  ·  ${leg === "out" ? "OUT ▲" : "BACK ▼"}`, W - 4, 3, C.canal, "right");
+  text(demo ? "DEMO  ·  CLICK TO PLAY" : showTouch ? "D-PAD OR SWIPE TO HOP" : "ARROWS / WASD HOP  ·  SPACE FORWARD", 4, 13, C.dim);
+  text("TIME", 290, 13, C.dim);
+  const t = hog && !hog.dead ? Math.max(0, hog.time) : TIME, w = Math.round(88 * t / TIME);
+  rect(C.line, 322, 14, 90, 6);
+  rect(t < 8 ? C.sign : C.amber, 323, 15, w, 4);
+}
+
+const TBTN = { up: { x: 30, y: 196, r: 10, s: "▲" }, down: { x: 30, y: 236, r: 10, s: "▼" }, left: { x: 10, y: 216, r: 10, s: "◀" }, right: { x: 50, y: 216, r: 10, s: "▶" }, hop: { x: 390, y: 220, r: 16, s: "HOP" } };
+const touch = {};
+function drawTouch() {
+  for (const [k, b] of Object.entries(TBTN)) {
+    ctx.fillStyle = touch[k] ? "rgba(255,182,72,0.5)" : "rgba(241,234,214,0.16)";
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(241,234,214,0.5)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(b.x + 0.5, b.y + 0.5, b.r, 0, Math.PI * 2); ctx.stroke();
+    text(b.s, b.x, b.y - 4, C.ink, "center");
+  }
+}
+
+function draw(demo) {
+  ctx.imageSmoothingEnabled = false;
+  if (bgLeg !== leg) bakeBackground();
+  ctx.save();
+  if (shake > 0 && !reduceMotion) ctx.translate(Math.round((Math.random() - 0.5) * 3), Math.round((Math.random() - 0.5) * 3));
+  drawWater();
+  ctx.drawImage(bgCanvas, 0, rowTop(0), W, rowTop(2) - rowTop(0), 0, rowTop(0), W, rowTop(2) - rowTop(0));
+  ctx.drawImage(bgCanvas, 0, rowTop(6) - 2, W, H - rowTop(6) + 2, 0, rowTop(6) - 2, W, H - rowTop(6) + 2);
+  ctx.drawImage(bgCanvas, 0, rowTop(2), W, 2, 0, rowTop(2), W, 2);
+  drawHomes();
+  drawLanes();
+  drawCritters();
+  drawHog();
+  for (const r of rings) { ctx.strokeStyle = r.c; ctx.globalAlpha = 1 - r.t / 0.6; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(r.x, r.y, 4 + r.t * 24, 2 + r.t * 12, 0, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  for (const p of parts) { ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life * 2.5); ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2); }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = PAL[leg].tint; ctx.fillRect(0, HUD, W, H - HUD);
+  drawFireflies();
+  for (const p of pops) text(p.s, p.x, p.y - p.t * 16, C.ink, "center");
+  ctx.restore();
+
+  drawHud(demo);
+  if (banner) {
+    const bw = 220, by = rowTop(6) - 6;
+    ctx.fillStyle = "rgba(7,9,6,0.85)"; ctx.fillRect(W / 2 - bw / 2, by, bw, 26);
+    rect(C.amber, W / 2 - bw / 2, by, bw, 1);
+    text(banner.a, W / 2, by + 4, C.amber, "center"); text(banner.b, W / 2, by + 15, C.ink, "center");
+  }
+  if (showTouch) drawTouch();
+}
+
+// ---- Input ----
+let lastInput = -1e9, queued = null, padLabel = "";
+const held = new Set();
+let repeatAt = 0;
+const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const fwdDir = () => [0, fwd()];
+function queue(d) { queued = { dx: d[0], dr: d[1] }; lastInput = performance.now(); repeatAt = clock + 0.18; }
+
+function readPad(now) {
+  let pads;
+  try { pads = navigator.getGamepads ? navigator.getGamepads() : []; }
+  catch (e) { setPadStatus("This viewer blocks controller input. Open design/concept-sheet.html in a browser tab to use it.", false); return null; }
+  const p = [...pads].find((g) => g && g.connected);
+  if (!p) { setPadStatus("No controller yet. Press any button on it.", false); return null; }
+  setPadStatus(`Connected: ${p.id.replace(/\s*\(.*\)\s*/g, " ").trim()}`, true);
+  const b = (i) => Boolean(p.buttons[i] && p.buttons[i].pressed);
+  const ax = p.axes[0] || 0, ay = p.axes[1] || 0;
+  let d = b(12) ? "up" : b(13) ? "down" : b(14) ? "left" : b(15) ? "right" : null;
+  if (!d && Math.max(Math.abs(ax), Math.abs(ay)) > 0.5) d = Math.abs(ax) > Math.abs(ay) ? (ax > 0 ? "right" : "left") : (ay > 0 ? "down" : "up");
+  if (b(0)) d = "fwd";
+  if (d || p.buttons.some((x) => x.pressed)) lastInput = now;
+  return d;
+}
+function setPadStatus(label, on) {
+  if (label === padLabel) return;
+  padLabel = label;
+  const el = document.getElementById("pad-status");
+  el.textContent = label; el.dataset.on = String(on);
+}
+let padWas = null;
+
+let lastTime = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastTime) / 1000); lastTime = now;
+  const padDir = readPad(now);
+  if (padDir && padDir !== padWas) queue(padDir === "fwd" ? fwdDir() : DIRS[padDir]);
+  padWas = padDir;
+  const demo = now - lastInput > 2500;
+  const frozen = reduceMotion && lastInput < 0;
+  if (!frozen) {
+    let input = null;
+    if (demo) input = autopilot(dt);
+    else {
+      if (queued) { input = queued; if (!hog || !hog.hopping) queued = null; }
+      else if (clock >= repeatAt) {
+        const h = [...held].pop() || (padDir ? padDir : null);
+        if (h) { input = h === "fwd" ? { dx: 0, dr: fwd() } : { dx: DIRS[h][0], dr: DIRS[h][1] }; repeatAt = clock + 0.14; lastInput = now; }
+      }
+    }
+    step(dt, input);
+  }
+  draw(demo);
+  requestAnimationFrame(frame);
+}
+
+const KEYMAP = { arrowup: "up", w: "up", arrowdown: "down", s: "down", arrowleft: "left", a: "left", arrowright: "right", d: "right", " ": "fwd" };
+cv.addEventListener("keydown", (ev) => {
+  const k = KEYMAP[ev.key.toLowerCase()];
+  if (!k) return;
+  ev.preventDefault();
+  if (ev.repeat) return;
+  held.add(k);
+  queue(k === "fwd" ? fwdDir() : DIRS[k]);
+});
+cv.addEventListener("keyup", (ev) => { const k = KEYMAP[ev.key.toLowerCase()]; if (k) held.delete(k); });
+cv.addEventListener("blur", () => held.clear());
+cv.addEventListener("contextmenu", (ev) => ev.preventDefault());
+const toCanvas = (ev) => { const r = cv.getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H }; };
+function touchHit(p) { for (const [k, b] of Object.entries(TBTN)) if (Math.hypot(p.x - b.x, p.y - b.y) < b.r + 5) return k; return null; }
+const swipes = new Map();
+cv.addEventListener("pointerdown", (ev) => {
+  cv.focus(); lastInput = performance.now();
+  const p = toCanvas(ev);
+  if (ev.pointerType === "touch") {
+    if (!showTouch) setTouch(true);
+    const k = touchHit(p);
+    if (k) { touch[k] = true; queue(k === "hop" ? fwdDir() : DIRS[k]); swipes.set(ev.pointerId, { btn: k }); }
+    else swipes.set(ev.pointerId, { x: p.x, y: p.y });
+    return;
+  }
+  // Mouse: hop toward the pointer along its stronger axis.
+  const h = hogPos(), dx = p.x - h.x, dy = p.y - h.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 6) return;
+  queue(Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)]);
+});
+const endPointer = (ev) => {
+  const s = swipes.get(ev.pointerId);
+  if (!s) return;
+  swipes.delete(ev.pointerId);
+  if (s.btn) { touch[s.btn] = false; return; }
+  const p = toCanvas(ev), dx = p.x - s.x, dy = p.y - s.y;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 10) queue(fwdDir());
+  else queue(Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)]);
+};
+window.addEventListener("pointerup", endPointer);
+window.addEventListener("pointercancel", endPointer);
+window.addEventListener("gamepadconnected", () => { lastInput = performance.now(); });
+
+function setTouch(on) {
+  showTouch = on;
+  document.querySelectorAll("[data-touch]").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.touch === "on") === on)));
+}
+function setLeg(l) {
+  leg = l;
+  document.querySelectorAll("[data-leg]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.leg === l)));
+  newLeg();
+}
+document.querySelectorAll("[data-touch]").forEach((b) => b.addEventListener("click", () => setTouch(b.dataset.touch === "on")));
+document.querySelectorAll("[data-leg]").forEach((b) => b.addEventListener("click", () => setLeg(b.dataset.leg)));
+
+// Start mid-leg: two hoglets already across, so the screen opens on a crossing in progress.
+newLeg();
+nests[3] = 1; nests[0] = 1; burrows[3] = 0; burrows[4] = 0;
+for (let i = 0; i < 300; i++) step(1 / 60, autopilot(1 / 60));
+requestAnimationFrame(frame);
+</script>

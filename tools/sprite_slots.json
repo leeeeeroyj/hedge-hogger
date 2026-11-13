@@ -1,0 +1,15 @@
+{
+  "player": {"subjects": ["hedgehog"], "picks": [595712, 595717, 595730, 595731, 595734, 595736, 595751, 595770], "browse": 64, "chosen": 595751, "mirror": true},
+  "mouse": {"subjects": ["field mouse", "pet mouse"], "picks": [439389, 439391, 439393, 439397, 439398, 439401, 439403, 439414], "browse": 32, "chosen": 439389, "mirror": true},
+  "car": {"subjects": ["car", "taxi cab"], "picks": [193878, 193887, 193890, 193898, 193899, 193900, 193906, 193907], "browse": 32, "chosen": 193898, "mirror": true},
+  "van": {"subjects": ["delivery van", "camper van"], "picks": [341204, 341211, 341217, 341218, 181887, 181890, 181892, 181905], "browse": 32, "chosen": 181887, "mirror": true},
+  "tractor": {"subjects": ["farm tractor"], "picks": [430457, 430464, 430468, 430475, 430479, 430490, 430491, 430517], "browse": 64, "chosen": 430464, "mirror": true},
+  "motorbike": {"subjects": ["motorcycle", "moped"], "picks": [802620, 802633, 802638, 802639, 802649, 798531, 798540, 798541], "browse": 32, "chosen": 802638, "mirror": true},
+  "lorry": {"subjects": ["ice cream truck", "dump truck"], "picks": [384372, 634449, 634457, 384364, 384376, 384380, 384384, 384391], "browse": 32, "chosen": 634449},
+  "duck": {"subjects": ["mallard duck", "farm duck"], "picks": [749610, 749621, 749622, 749630, 749634, 430226, 430247, 430250], "browse": 32, "chosen": 749610, "mirror": true},
+  "lily": {"subjects": ["lily pad", "water lily"], "picks": [719560, 719567, 719570, 719576, 719577, 719584, 719585, 719590], "browse": 32, "chosen": 719560},
+  "heron": {"subjects": ["heron", "egret"], "picks": [600207, 600211, 600214, 600220, 600223, 600233, 600238, 400172], "browse": 32, "chosen": 600214, "mirror": true},
+  "fox": {"subjects": ["fox"], "picks": [486288, 486292, 486294, 486287, 486289, 486291, 486298, 486308], "browse": 64, "chosen": 486287, "mirror": true},
+  "farmer": {"subjects": ["farmer"], "picks": [430704, 430701, 430716, 430723, 430729, 430730, 430736, 430747], "browse": 64, "chosen": 430730},
+  "beetle": {"subjects": ["stag beetle", "ladybug"], "picks": [1188140, 1188145, 1188147, 1188164, 693222, 693229, 693239, 693248], "browse": 32, "chosen": 1188140, "mirror": true}
+}
