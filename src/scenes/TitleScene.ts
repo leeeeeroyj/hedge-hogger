@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { ATTRACT, attractSeed } from '../attract';
+import { loadHi } from '../hi';
 import { FONT, HEIGHT, RENDER_SCALE, SPRITES, TEXT, WIDTH, type SpriteKey } from '../config';
 import { Water, bakeTextures, fieldKey } from '../backdrop';
 import { Controls } from '../controls';
@@ -29,6 +31,8 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create() {
+    // Attract mode goes straight to a crossing once the sprites are loaded.
+    if (ATTRACT) return void this.scene.start('crossing', { attract: attractSeed() });
     this.leaving = false;
     this.padStatus = undefined;
     this.controls = new Controls(this);
@@ -54,6 +58,8 @@ export class TitleScene extends Phaser.Scene {
     text(cx, 12, 'FIVE HOGLETS  ·  ONE NIGHT  ·  THERE AND BACK', 8, TEXT.dim);
     text(cx, 22, 'HEDGE-HOGGER', 24, TEXT.amber);
     text(cx, 50, 'HOP THEM OVER THE ROAD AND THE CANAL, THEN BRING THEM HOME.', 8, TEXT.ink);
+    const hi = loadHi();
+    if (hi) text(WIDTH - 40, 2, `HI ${hi.toLocaleString('en-US')}`, 8, TEXT.amber);
 
     text(70, 68, 'YOU', 8, TEXT.dim);
     sprite('player', 70, 88);
@@ -75,11 +81,11 @@ export class TitleScene extends Phaser.Scene {
       this.add.text(x + 4, 160, actions, { fontFamily: FONT, fontSize: '8px', color: TEXT.dim, lineSpacing: 2 }).setDepth(depth);
     };
     if (touchScreen) {
-      column(cx, 'TOUCH', 'D-PAD\nHOP\nSWIPE\nTAP\nSPEAKER', 'HOP\nHOP FORWARD\nHOP THAT WAY\nHOP FORWARD\nSOUND, TOP RIGHT IN GAME');
+      column(cx, 'TOUCH', 'D-PAD\nHOP\nSWIPE\nTAP\nII\nSPEAKER', 'HOP\nHOP FORWARD\nHOP THAT WAY\nHOP FORWARD\nPAUSE, TOP LEFT IN GAME\nSOUND, TOP RIGHT IN GAME');
       return;
     }
-    column(112, 'KEYBOARD + MOUSE', 'ARROWS / WASD\nSPACE\nCLICK\nM', 'HOP\nHOP FORWARD\nHOP TOWARD IT\nSOUND ON/OFF');
-    column(308, 'CONTROLLER', 'D-PAD / STICK\nA\nY', 'HOP\nHOP FORWARD\nSOUND ON/OFF');
+    column(112, 'KEYBOARD + MOUSE', 'ARROWS / WASD\nSPACE\nCLICK\nP\nM', 'HOP\nHOP FORWARD\nHOP TOWARD IT\nPAUSE\nSOUND ON/OFF');
+    column(308, 'CONTROLLER', 'D-PAD / STICK\nA\nSTART\nY', 'HOP\nHOP FORWARD\nPAUSE\nSOUND ON/OFF');
     this.padStatus = text(cx, 224, '', 8, TEXT.dim);
   }
 

@@ -17,6 +17,9 @@ export interface HudState {
   device: Device;
   /** Set when the last life is gone: the game-over panel shows. */
   over: { newHi: boolean } | null;
+  paused: boolean;
+  /** Attract mode: no hints, pause, sound or game-over panel. */
+  attract: boolean;
 }
 
 // HUD space is the design size × HUD_SCALE (832×496): sprites drawn here at native 16 px come out half the size
@@ -25,16 +28,20 @@ const S = HUD_SCALE;
 const W = WIDTH * S, BAR = HUD_H * S;
 const MAX_ICONS = 6;
 const HINTS: Record<Device, string> = {
-  kbm: 'ARROWS / WASD HOP  ·  SPACE FORWARD  ·  M SOUND',
-  pad: 'D-PAD HOP  ·  A FORWARD  ·  Y SOUND',
+  kbm: 'ARROWS HOP · SPACE FORWARD · P PAUSE · M SOUND',
+  pad: 'D-PAD HOP · A FORWARD · START PAUSE · Y SOUND',
   touch: 'D-PAD OR SWIPE TO HOP  ·  TAP TO HOP FORWARD',
 };
+const PAUSE_HINTS: Record<Device, string> = { kbm: 'P OR ENTER RESUME  ·  ESC TITLE', pad: 'START OR A RESUME  ·  BACK TITLE', touch: 'TAP RESUME' };
+
 const OVER_HINTS: Record<Device, string> = {
   kbm: 'ENTER RETRY  ·  ESC TITLE',
   pad: 'A RETRY  ·  BACK TITLE',
   touch: 'TAP A BUTTON',
 };
 const LINE1 = 6, LINE2 = 26;
+/** Pause on touch: two bars at the start of the hint line, with a thumb-sized tap zone. */
+const PAUSE = { x: 10, y: LINE2 + 1 };
 /** Game-over panel, centred on the field. Buttons are 48 units tall: 36 CSS px or more on a landscape phone. */
 const PANEL = { x: W / 2, y: BAR + (HEIGHT * S - BAR) / 2, w: 380, h: 208 };
 const TIMER = { x: 640, y: LINE2 + 2, w: 152, h: 12 };
@@ -56,6 +63,11 @@ export class HudScene extends Phaser.Scene {
   private overScore!: Phaser.GameObjects.Text;
   private overHi!: Phaser.GameObjects.Text;
   private overHint!: Phaser.GameObjects.Text;
+  private pauseMenu!: Phaser.GameObjects.Container;
+  private pauseHint!: Phaser.GameObjects.Text;
+  private pauseZones: Phaser.GameObjects.Zone[] = [];
+  private pauseTap!: Phaser.GameObjects.Zone;
+  private speakerTap!: Phaser.GameObjects.Zone;
 
   constructor() {
     super('hud');
@@ -83,13 +95,45 @@ export class HudScene extends Phaser.Scene {
     this.dynamic = this.add.graphics();
 
     // Phones have no M key: the speaker is a tap target, padded for a thumb (64 × 48 units: about 50 × 38 CSS px).
-    this.add.zone(W - 64, 0, 64, BAR).setOrigin(0).setInteractive({ useHandCursor: true })
+    this.speakerTap = this.add.zone(W - 64, 0, 64, BAR).setOrigin(0).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => toggleMute(this));
+    // And no P key: on touch, II at the start of the hint line pauses.
+    this.pauseTap = this.add.zone(0, LINE2 - 8, 56, BAR - LINE2 + 8).setOrigin(0).setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.crossing().setPaused(true));
     this.buildOverPanel(label);
+    this.buildPause(label);
+  }
+
+  private crossing() {
+    return this.scene.get('crossing') as unknown as { setPaused(on: boolean): void; retry(): void; leave(): void };
+  }
+
+  /** The pause panel: RESUME and TITLE, as buttons a thumb or the mouse can hit. */
+  private buildPause(label: (x: number, y: number, text: string, color?: string) => Phaser.GameObjects.Text) {
+    this.pauseZones = [];
+    const w = 380, h = 190, x = W / 2, top = PANEL.y - h / 2, g = this.add.graphics();
+    g.fillStyle(COLORS.void, 0.55).fillRect(0, BAR, W, HEIGHT * S - BAR);
+    g.fillStyle(COLORS.panel, 0.96).fillRect(x - w / 2, top, w, h);
+    g.lineStyle(2, COLORS.line).strokeRect(x - w / 2, top, w, h);
+    const parts: Phaser.GameObjects.GameObject[] = [g, this.add.text(x, top + 20, 'PAUSED', { fontFamily: FONT, fontSize: '32px', color: TEXT.ink }).setOrigin(0.5, 0)];
+    const button = (bx: number, text: string, primary: boolean, act: () => void) => {
+      const bw = 140, bh = 48, by = top + 84, art = this.add.graphics();
+      if (primary) art.fillStyle(COLORS.amber).fillRect(bx - bw / 2, by, bw, bh);
+      else art.lineStyle(2, COLORS.ink).strokeRect(bx - bw / 2 + 1, by + 1, bw - 2, bh - 2);
+      const t = label(bx, by + bh / 2, text, primary ? '#070906' : TEXT.ink).setOrigin(0.5);
+      const zone = this.add.zone(bx - bw / 2, by, bw, bh).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerdown', act);
+      this.pauseZones.push(zone);
+      parts.push(art, t, zone);
+    };
+    button(x - 80, 'RESUME', true, () => this.crossing().setPaused(false));
+    button(x + 80, 'TITLE', false, () => this.crossing().leave());
+    this.pauseHint = label(x, top + h - 34, '').setOrigin(0.5, 0);
+    parts.push(this.pauseHint);
+    this.pauseMenu = this.add.container(0, 0, parts).setVisible(false).setDepth(10);
   }
 
   private buildOverPanel(label: (x: number, y: number, text: string, color?: string) => Phaser.GameObjects.Text) {
-    const crossing = () => this.scene.get('crossing') as unknown as { retry(): void; leave(): void };
+    const crossing = () => this.crossing();
     const { x, y, w, h } = PANEL;
     const bg = this.add.graphics();
     bg.fillStyle(COLORS.void, 0.55).fillRect(0, BAR, W, HEIGHT * S - BAR);
@@ -123,9 +167,16 @@ export class HudScene extends Phaser.Scene {
     this.hi.setText(pts(s.hi));
     this.combo.setVisible(s.combo > 1).setText(`x${s.combo}`);
     this.night.setText(`NIGHT ${s.night}  ·  ${s.leg === 'out' ? 'OUT' : 'BACK'}`);
-    this.hint.setText(HINTS[s.device]);
-    this.overPanel.setVisible(!!s.over);
-    for (const obj of this.overPanel.list) if (obj instanceof Phaser.GameObjects.Zone) obj.input!.enabled = !!s.over;
+    const pauseTap = s.device === 'touch' && !s.attract && !s.over && !s.paused;
+    this.hint.setText(s.attract ? '' : HINTS[s.device]).setX(pauseTap ? 40 : 8);
+    this.pauseTap.input!.enabled = pauseTap;
+    this.speakerTap.input!.enabled = !s.attract;
+    this.pauseMenu.setVisible(s.paused);
+    for (const z of this.pauseZones) z.input!.enabled = s.paused;
+    if (s.paused) this.pauseHint.setText(PAUSE_HINTS[s.device]);
+    const over = !!s.over && !s.attract;
+    this.overPanel.setVisible(over);
+    for (const obj of this.overPanel.list) if (obj instanceof Phaser.GameObjects.Zone) obj.input!.enabled = over;
     if (s.over) {
       this.overScore.setText(`SCORE ${pts(s.score)}`);
       this.overHi.setVisible(s.over.newHi && Math.floor(this.time.now / 300) % 2 === 0);
@@ -150,6 +201,8 @@ export class HudScene extends Phaser.Scene {
     g.fillStyle(COLORS.line).fillRect(TIMER.x, TIMER.y, TIMER.w, TIMER.h);
     g.fillStyle(s.time < 8 ? COLORS.danger : COLORS.amber).fillRect(TIMER.x + 2, TIMER.y + 2, Math.round((TIMER.w - 4) * t), TIMER.h - 4);
 
+    if (pauseTap) g.fillStyle(COLORS.ink).fillRect(PAUSE.x, PAUSE.y, 5, 14).fillRect(PAUSE.x + 9, PAUSE.y, 5, 14);
+    if (s.attract) return;
     // Speaker: three waves when on, a cross when muted. Drawn in 2 px blocks to match the game's pixels.
     const muted = this.registry.get(MUTED) === true;
     g.fillStyle(muted ? COLORS.danger : COLORS.ink);

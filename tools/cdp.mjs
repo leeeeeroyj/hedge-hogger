@@ -10,6 +10,7 @@ const KEYS = {
   ArrowRight: [39, 'ArrowRight'], ArrowLeft: [37, 'ArrowLeft'], ArrowUp: [38, 'ArrowUp'], ArrowDown: [40, 'ArrowDown'],
   Enter: [13, 'Enter'], Escape: [27, 'Escape'], ' ': [32, 'Space'], m: [77, 'KeyM'],
   w: [87, 'KeyW'], a: [65, 'KeyA'], s: [83, 'KeyS'], d: [68, 'KeyD'],
+  z: [90, 'KeyZ'], x: [88, 'KeyX'], Shift: [16, 'ShiftLeft'], p: [80, 'KeyP'],
 };
 
 export async function until(fn, ms = 15000, step = 100) {
@@ -23,9 +24,10 @@ export async function until(fn, ms = 15000, step = 100) {
 
 /**
  * Starts the dev server on `port` (strict, so it never lands on another game's server) and Chrome on `debugPort`,
- * then opens the game. `touch` turns on touch emulation and `pointer: coarse` before the page loads.
+ * then opens the game at `path`. `touch` turns on touch emulation and `pointer: coarse` before the page loads; `init` is
+ * a script that runs in the page before the game's own.
  */
-export async function session({ project, out, port, debugPort, width = 1664, height = 992, touch = false, mobile = false }) {
+export async function session({ project, out, port, debugPort, width = 1664, height = 992, touch = false, mobile = false, path = '/', init = '' }) {
   mkdirSync(out, { recursive: true });
   const results = [];
   const errors = [];
@@ -106,7 +108,8 @@ export async function session({ project, out, port, debugPort, width = 1664, hei
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
     await send('Emulation.setEmulatedMedia', { features: [{ name: 'pointer', value: 'coarse' }, { name: 'hover', value: 'none' }] });
   }
-  await send('Page.navigate', { url: `http://localhost:${port}/` });
+  if (init) await send('Page.addScriptToEvaluateOnNewDocument', { source: init });
+  await send('Page.navigate', { url: `http://localhost:${port}${path}` });
 
   return { send, evaluate, until, shot, down, up, tap, click, press, move, lift, check, done, errors, sleep };
 }

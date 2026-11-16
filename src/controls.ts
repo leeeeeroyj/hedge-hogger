@@ -15,6 +15,8 @@ export interface ControlState {
   confirm: boolean;
   back: boolean;
   mute: boolean;
+  /** P on the keyboard, Start on a controller (Start also confirms, for menus). */
+  pause: boolean;
   device: Device;
 }
 
@@ -23,12 +25,12 @@ const STICK = 0.5;
 const BTN = { A: 0, Y: 3, BACK: 8, START: 9 } as const;
 const TRACKED = Object.values(BTN);
 
-type KeyName = 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' | 'W' | 'A' | 'S' | 'D' | 'ENTER' | 'SPACE' | 'ESC' | 'M';
+type KeyName = 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' | 'W' | 'A' | 'S' | 'D' | 'ENTER' | 'SPACE' | 'ESC' | 'M' | 'P';
 
 /**
  * One input layer. Keyboard: arrows or WASD hop, Space hops forward (and confirms on menus), Enter confirms, Esc goes
- * back, M toggles sound. Mouse: a click hops toward the pointer. Controller: D-pad or left stick hops, A hops forward
- * and confirms, Start confirms, Back goes back, Y toggles sound. Touch: the d-pad and HOP, swipes and taps
+ * back, M toggles sound, P pauses. Mouse: a click hops toward the pointer. Controller: D-pad or left stick hops, A hops forward
+ * and confirms, Start pauses and confirms, Back goes back, Y toggles sound. Touch: the d-pad and HOP, swipes and taps
  * (src/touch.ts). The last device used decides the hints.
  * Construct one per scene.
  */
@@ -43,7 +45,7 @@ export class Controls {
   private gestures: Gesture[] = [];
 
   constructor(private readonly scene: Phaser.Scene) {
-    this.keys = scene.input.keyboard!.addKeys('LEFT,RIGHT,UP,DOWN,W,A,S,D,ENTER,SPACE,ESC,M') as Controls['keys'];
+    this.keys = scene.input.keyboard!.addKeys('LEFT,RIGHT,UP,DOWN,W,A,S,D,ENTER,SPACE,ESC,M,P') as Controls['keys'];
     scene.input.mouse?.disableContextMenu();
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
       this.device = p.wasTouch ? 'touch' : 'kbm';
@@ -70,12 +72,13 @@ export class Controls {
     let confirm = just(k.ENTER) || space;
     let back = just(k.ESC);
     let mute = just(k.M);
+    let pause = just(k.P);
     let tapped: HopDir | null = just(k.UP) || just(k.W) ? 'up' : just(k.DOWN) || just(k.S) ? 'down'
       : just(k.LEFT) || just(k.A) ? 'left' : just(k.RIGHT) || just(k.D) ? 'right' : space ? 'fwd' : null;
     let dir: HopDir | null =
       k.UP.isDown || k.W.isDown ? 'up' : k.DOWN.isDown || k.S.isDown ? 'down' : k.LEFT.isDown || k.A.isDown ? 'left'
         : k.RIGHT.isDown || k.D.isDown ? 'right' : k.SPACE.isDown ? 'fwd' : null;
-    if (confirm || back || mute || dir || tapped) this.device = 'kbm';
+    if (confirm || back || mute || pause || dir || tapped) this.device = 'kbm';
 
     const pad = this.pad();
     const down = new Set(pad ? TRACKED.filter((i) => pad.buttons[i]?.pressed) : []);
@@ -91,6 +94,7 @@ export class Controls {
       confirm ||= edges.has(BTN.A) || edges.has(BTN.START);
       back ||= edges.has(BTN.BACK);
       mute ||= edges.has(BTN.Y);
+      pause ||= edges.has(BTN.START);
     }
 
     // Touch: a held button acts like a held key; swipes and taps are one-off hops, one per frame.
@@ -117,6 +121,6 @@ export class Controls {
     }
     const click = this.pendingClick;
     this.pendingClick = null;
-    return { hop, click, confirm, back, mute, device: this.device };
+    return { hop, click, confirm, back, mute, pause, device: this.device };
   }
 }

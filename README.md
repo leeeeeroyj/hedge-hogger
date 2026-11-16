@@ -48,6 +48,8 @@ From the bottom of the screen: the garden hedge with five burrows, a verge, a fi
 - **The hop combo:** hop forward again within half a second of landing: ×2, ×3, up to ×4. It multiplies hop and home points. Stopping or hopping back ends it.
 - **Nights:** get all five across and the next leg begins. A night is out at dusk and back in the dark; each leg is a little faster than the last, and the fox and the farmer join from night 2.
 - **Game over:** retry the same leg from zero (the lanes come back exactly as they were), or go back to the title.
+- **High score:** your best is kept in this browser and shown on the title and in the top bar.
+- **Attract mode:** add `?attract` to the address for a silent demo that hops by itself on a different night and leg each time, and ignores input. `?attract&seed=<n>` repeats the same demos.
 
 **Who's about**
 
@@ -77,11 +79,12 @@ From the bottom of the screen: the garden hedge with five burrows, a verge, a fi
 | Hop forward | Space | A | **HOP**, or tap anywhere on the field |
 | Hop toward a spot | Click it | — | — |
 | Start | Enter or Space, or click **START** | A or Start | Tap **START** |
+| Pause | P | Start | Tap **II** (top left) |
 | Sound on / off | M, or click the speaker (top right) | Y | Tap the speaker |
 | Retry after game over | Enter or Space, or click **RETRY** | A or Start | Tap **RETRY** |
-| Back to the title | Esc, or click **TITLE** after game over | Back | Tap **TITLE** after game over |
+| Back to the title | Esc, or click **TITLE** when paused or after game over | Back | Tap **TITLE** when paused or after game over |
 
-"Forward" means toward the hedge you're heading for: up the screen on the way out, down on the way back. Controllers show up once you press a button. On a phone, play in landscape: the d-pad and HOP sit beside the game on wide screens and over its bottom corners otherwise.
+"Forward" means toward the hedge you're heading for: up the screen on the way out, down on the way back. The game pauses itself if you switch away. Controllers show up once you press a button. On a phone, play in landscape: the d-pad and HOP sit beside the game on wide screens and over its bottom corners otherwise.
 
 ## Run it locally
 
@@ -109,12 +112,16 @@ src/
   touch.ts           on-screen d-pad, HOP, swipes and taps
   effects.ts         sparks, rings, shake and flash
   sfx.ts             procedural sound effects
+  hi.ts              the high score, kept in localStorage
+  attract.ts         the ?attract demo mode's settings
   scenes/            title screen, the crossing and the HUD
 assets/sprites/      the game's 16 × 16 sprites
 design/              concept sheet and build plan
 tools/sprites.py     sprite search and export script
 tools/cdp.mjs        headless Chrome harness for the tests
 tools/m*-test.mjs    checks for each milestone
+tools/pause-hi-test.mjs  checks pause and the high score on the title
+tools/attract-test.mjs   checks the ?attract demo
 tools/fairness.mjs   checks every seeded layout can be crossed in time
 ```
 

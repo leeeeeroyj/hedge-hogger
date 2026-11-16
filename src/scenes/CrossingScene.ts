@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
-import { COLORS, CRITTERS, EXTRA_LIFE, FONT, FX, HEIGHT, HI_STORAGE, HOGLET, HOMES, HUD_H, HUD_STATE, PALETTES, POINTS, RAMP, RENDER_SCALE, ROW, TEXT, TILE, WIDTH, legIndex, rowMid, rowTop, type Leg } from '../config';
+import { COLORS, CRITTERS, EXTRA_LIFE, FONT, FX, HEIGHT, HOGLET, HOMES, HUD_H, HUD_STATE, PALETTES, POINTS, RAMP, RENDER_SCALE, ROW, TEXT, TILE, WIDTH, legIndex, rowMid, rowTop, type Leg } from '../config';
+import { ATTRACT, DEMO_SECS } from '../attract';
 import { Effects } from '../effects';
+import { loadHi, saveHi } from '../hi';
 import { Water, bakeTextures, fieldKey } from '../backdrop';
-import { Controls, type HopDir } from '../controls';
+import { Controls, type ControlState, type HopDir } from '../controls';
 import { DEPTH, LaneView, face } from '../laneView';
 import { Critters, farmerPos, type Cause, type HogView } from '../critters';
 import { advance, isRoad, isWater, itemX, layout, platformAt, rng, seedFor, vehicleAt, type Lane } from '../lanes';
@@ -92,12 +94,29 @@ export class CrossingScene extends Phaser.Scene {
   private leaving = false;
   /** Dev-only: stops the lanes and the timer so tests can set up exact positions. */
   private frozen = false;
+  /** Paused: nothing moves and the HUD shows RESUME and TITLE. */
+  paused = false;
+  /** Attract mode: this demo's seed (the next demo uses the one after), and how long it has run. */
+  private demoSeed = -1;
+  private demoOver = false;
+  /** Attract mode: the pilot's pause between hops, s. */
+  private pilotRest = 0;
+  /** Dev: demos started since the page loaded (attract mode). */
+  static demos = 0;
 
   constructor() {
     super('crossing');
   }
 
-  create() {
+  /** `attract` (a seed) runs a demo: the pilot hops a night and leg picked by the seed. */
+  create(data: { attract?: number } = {}) {
+    const demo = data.attract !== undefined;
+    this.demoSeed = demo ? data.attract! : -1;
+    this.demoOver = false;
+    this.pilotRest = 0;
+    this.paused = false;
+    this.tweens.resumeAll();
+    if (demo) CrossingScene.demos++;
     this.leaving = false;
     this.frozen = false;
     this.clock = 0;
@@ -110,7 +129,7 @@ export class CrossingScene extends Phaser.Scene {
     this.newHi = false;
     this.hi = loadHi();
     this.rings = [];
-    this.controls = new Controls(this);
+    if (!demo) this.controls = new Controls(this);
     fitCamera(this, RENDER_SCALE);
     restoreMute(this);
     bakeTextures(this);
@@ -134,9 +153,90 @@ export class CrossingScene extends Phaser.Scene {
     this.played = [];
     this.dawn = 0;
     this.torch = this.add.image(0, 0, 'torch').setOrigin(0, 0.5).setDepth(DEPTH.lights).setBlendMode(Phaser.BlendModes.ADD).setVisible(false);
-    this.setLeg('out', 1);
+    if (demo) this.setLeg(this.demoSeed % 2 ? 'back' : 'out', 1 + (Math.floor(this.demoSeed / 2) % 4));
+    else this.setLeg('out', 1);
     if (!this.scene.isActive('hud')) this.scene.launch('hud');
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => touchControls.show(false));
+    // A phone call, a tab switch or the screen locking pauses the game.
+    const hidden = () => { if (document.hidden) this.setPaused(true); };
+    if (!demo) document.addEventListener('visibilitychange', hidden);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      touchControls.show(false);
+      document.removeEventListener('visibilitychange', hidden);
+    });
+  }
+
+  /** Pauses or resumes (not on the game-over panel or attract mode). Popups wait too. */
+  setPaused(on: boolean) {
+    if (this.demoSeed >= 0 || on === this.paused || (on && (this.over || this.leaving))) return;
+    this.paused = on;
+    if (on) this.tweens.pauseAll();
+    else this.tweens.resumeAll();
+    this.sfx('bump');
+  }
+
+  /**
+   * Attract mode's hopper, moved here from Arcadia's loop recorder: it hops only when the game's own lane rules
+   * (vehicleAt / platformAt, with their look-ahead) say the landing spot stays safe, lines up with a free home before
+   * the last hop, and steps aside when where it stands is about to be hit.
+   */
+  private pilot(dt: number): ControlState {
+    const none: ControlState = { hop: null, click: null, confirm: false, back: false, mute: false, pause: false, device: 'kbm' };
+    const h = this.hog;
+    this.pilotRest -= dt;
+    if (h.hopping || h.dead > 0 || this.between > 0 || this.over) return none;
+    const hop = HOGLET.hopTime, f = this.fwd, r = h.r, x = h.x;
+    const range = (a: number, b: number, ok: (d: number) => boolean) => { for (let d = a; d <= b; d += 0.03) if (!ok(d)) return false; return true; };
+    const roadOk = (row: number, px: number, a: number, b: number) => !isRoad(row) || range(a, b, (d) => !vehicleAt(this.laneAt.get(row)!, px, d, 6));
+    const waterOk = (row: number, px: number, a: number, b: number) => {
+      if (!isWater(row)) return true;
+      const lane = this.laneAt.get(row)!;
+      return range(a, b, (d) => {
+        const rx = px + lane.dir * lane.speed * (d - a);
+        return rx > 14 && rx < WIDTH - 14 && !!platformAt(lane, rx, this.clock, d);
+      });
+    };
+    // Critters: the fox on the middle verge, the heron on the towpath (and its stab into the top canal lane), the
+    // farmer wherever he's chasing. Each is given a few pixels' margin, and the fox its path over the window.
+    const c = this.critters, C = CRITTERS;
+    const critterOk = (row: number, px: number, a: number, b: number) => range(a, b, (d) => {
+      if (row === ROW.midVerge && this.night >= C.fox.fromNight && Math.abs(px - (c.fox.x + c.fox.dir * C.fox.speed * d)) < C.fox.hit + 8) return false;
+      if (row === ROW.towpath && Math.abs(px - c.heron.x) < C.heron.hit + 8) return false;
+      if (row === ROW.canalTop && c.heron.st !== 'walk' && Math.abs(px - c.heron.x) < C.heron.stab + 6) return false;
+      const f = c.farmer;
+      if (f && f.st === 'chase') {
+        const fp = farmerPos(f);
+        if (Math.abs(fp.x - px) < C.farmer.hitX + 14 && Math.abs(fp.y - rowMid(row)) < TILE * 1.5) return false;
+      }
+      return true;
+    });
+    const homeAt = (px: number) => HOMES.findIndex((hx, k) => !this.goals[k] && Math.abs(px - hx) < HOGLET.homeSnap);
+    const safe = (row: number, px: number) => {
+      if (row < 0 || row > ROW.burrows || row === this.startRow) return false;
+      if (row === this.goalRow) return homeAt(px) >= 0;
+      if (!isWater(row) && (px < 8 || px > WIDTH - 8)) return false;
+      return roadOk(row, px, hop * 0.4, hop + 0.5) && waterOk(row, px, hop, hop + 0.7) && critterOk(row, px, hop * 0.5, hop + 0.6);
+    };
+    const danger = !roadOk(r, x, 0, 0.5) || !waterOk(r, x, 0, 0.6) || !critterOk(r, x, 0, 0.4);
+    // It only dawdles on a verge or the towpath, never in a lane.
+    const exposed = isRoad(r) || isWater(r);
+    if (!danger && !exposed && this.pilotRest > 0) return none;
+    const go = (dx: number, dr: number): ControlState => {
+      this.pilotRest = 0.12 + Math.random() * 0.35;
+      return { ...none, hop: dr === f ? 'fwd' : dr ? (dr < 0 ? 'up' : 'down') : dx < 0 ? 'left' : 'right' };
+    };
+    // Line up with a free home before the last hop.
+    if (r + f === this.goalRow && homeAt(x) < 0) {
+      const target = HOMES.filter((_, k) => !this.goals[k]).sort((a, b) => Math.abs(a - x) - Math.abs(b - x))[0];
+      const dx = Math.sign(target - x);
+      if (dx && safe(r, x + dx * TILE)) return go(dx, 0);
+    }
+    if (safe(r + f, x)) return go(0, f);
+    if (danger) {
+      // Sideways away from the nearest threat first, then back.
+      const away = c.farmer && c.farmer.st === 'chase' ? Math.sign(x - farmerPos(c.farmer).x) || 1 : r === ROW.midVerge ? Math.sign(x - c.fox.x) || 1 : 1;
+      for (const [dx, dr] of [[away, 0], [-away, 0], [0, -f]]) if (safe(r + dr, x + dx * TILE)) return go(dx, dr);
+    }
+    return none;
   }
 
   private get startRow() { return this.leg === 'out' ? ROW.burrows : ROW.nests; }
@@ -200,11 +300,24 @@ export class CrossingScene extends Phaser.Scene {
 
   update(_time: number, delta: number) {
     const dt = Math.min(0.05, delta / 1000);
-    // The touch controls show during play and hide behind the game-over panel.
-    touchControls.show(!this.over && !this.leaving);
-    const input = this.controls.read();
+    const demo = this.demoSeed >= 0;
+    // The touch controls show during play and hide behind the game-over and pause panels.
+    touchControls.show(!demo && !this.over && !this.leaving && !this.paused);
+    const input = demo ? this.pilot(dt) : this.controls.read();
     if (input.mute) toggleMute(this);
     if (input.back) { this.leave(); return; }
+    if (demo && !this.demoOver && (this.over || this.age > DEMO_SECS)) {
+      // Attract mode: the next demo, from the next seed.
+      this.demoOver = true;
+      this.scene.restart({ attract: (this.demoSeed + 1) % 2 ** 31 });
+      return;
+    }
+    if (this.paused) {
+      if (input.pause || input.confirm) this.setPaused(false);
+      this.publishHud(input.device);
+      return;
+    }
+    if (input.pause && !this.over) { this.setPaused(true); return; }
     this.age += dt;
     if (this.over && input.confirm) { this.retry(); return; }
     if (!this.frozen) {
@@ -252,10 +365,13 @@ export class CrossingScene extends Phaser.Scene {
     this.lastTick = secs;
 
     if (this.score > this.hi) { this.hi = this.score; this.newHi = true; }
-    const combo = this.hog.combo;
+    this.publishHud(input.device);
+  }
+
+  private publishHud(device: ControlState['device']) {
     const hud: HudState = {
-      score: this.score, hi: this.hi, lives: this.lives, night: this.night, leg: this.leg, time: this.hog.time, combo, device: input.device,
-      over: this.over ? { newHi: this.newHi } : null,
+      score: this.score, hi: this.hi, lives: this.lives, night: this.night, leg: this.leg, time: this.hog.time, combo: this.hog.combo, device,
+      over: this.over ? { newHi: this.newHi } : null, paused: this.paused, attract: this.demoSeed >= 0,
     };
     this.registry.set(HUD_STATE, hud);
   }
@@ -508,6 +624,7 @@ export class CrossingScene extends Phaser.Scene {
   }
 
   private sfx(name: SoundName, config?: Phaser.Types.Sound.SoundConfig) {
+    if (ATTRACT) return;
     if (import.meta.env.DEV) this.played = [...this.played.slice(-39), name];
     playSound(this, name, config);
   }
@@ -638,18 +755,3 @@ export class CrossingScene extends Phaser.Scene {
   }
 }
 
-function loadHi() {
-  try {
-    return Math.max(0, Number(localStorage.getItem(HI_STORAGE)) || 0);
-  } catch {
-    return 0;
-  }
-}
-
-function saveHi(hi: number) {
-  try {
-    if (hi > loadHi()) localStorage.setItem(HI_STORAGE, String(hi));
-  } catch {
-    // Private windows and blocked storage: the high score just doesn't stick.
-  }
-}
